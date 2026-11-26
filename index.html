@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StemVerse K-12 | Interactive Science & Math Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Space Grotesk -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#1e1b4b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbars & Animations */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+        
+        .glass-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float { animation: floatSlow 4s ease-in-out infinite; }
+        
+        canvas {
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-indigo-500 selection:text-white min-h-screen flex flex-col">
+
+    <!-- Toast Notification Container (Replaces alert()) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-40 glass-card border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('explorer')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-atom text-white text-xl"></i>
+                </div>
+                <div>
+                    <span class="font-display font-bold text-xl tracking-tight bg-gradient-to-r from-white via-indigo-200 to-emerald-300 bg-clip-text text-transparent">StemVerse</span>
+                    <span class="hidden sm:inline-block ml-1.5 text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Grades 1–12</span>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+                <button onclick="switchMainTab('explorer')" id="nav-explorer" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition-all bg-indigo-600 text-white shadow">
+                    <i class="fa-solid fa-compass mr-1.5"></i>Grade Explorer
+                </button>
+                <button onclick="switchMainTab('labs')" id="nav-labs" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white transition-all">
+                    <i class="fa-solid fa-flask-vial mr-1.5"></i>Interactive Labs
+                </button>
+                <button onclick="switchMainTab('quiz')" id="nav-quiz" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white transition-all">
+                    <i class="fa-solid fa-trophy mr-1.5"></i>Quiz Arena
+                </button>
+            </nav>
+
+            <!-- Right Actions: XP Counter & OnRender Deploy Guide -->
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:flex items-center gap-2 bg-slate-900/90 border border-slate-800 px-3 py-1.5 rounded-xl" title="Your Earned STEM XP">
+                    <i class="fa-solid fa-bolt text-amber-400"></i>
+                    <span id="user-xp" class="font-display font-bold text-sm text-amber-300">120 XP</span>
+                </div>
+                <button onclick="openRenderModal()" class="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-lg shadow-emerald-500/20 transition transform active:scale-95">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span>Deploy on Render</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Sub-navigation -->
+        <div class="flex md:hidden border-t border-slate-800/80 bg-slate-900/95 px-2 py-1.5 justify-around">
+            <button onclick="switchMainTab('explorer')" id="mob-nav-explorer" class="flex-1 py-1.5 text-center rounded-lg text-xs font-semibold bg-indigo-600 text-white">
+                <i class="fa-solid fa-compass mr-1"></i>Grades 1-12
+            </button>
+            <button onclick="switchMainTab('labs')" id="mob-nav-labs" class="flex-1 py-1.5 text-center rounded-lg text-xs font-semibold text-slate-400">
+                <i class="fa-solid fa-flask mr-1"></i>Mini-Labs
+            </button>
+            <button onclick="switchMainTab('quiz')" id="mob-nav-quiz" class="flex-1 py-1.5 text-center rounded-lg text-xs font-semibold text-slate-400">
+                <i class="fa-solid fa-trophy mr-1"></i>Quiz Mode
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="relative overflow-hidden border-b border-slate-800/80 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950 py-8 sm:py-12">
+        <div class="absolute -top-24 -left-24 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-8">
+                <div class="max-w-2xl text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold mb-4">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        Complete K-12 Curriculum • Ready for Render.com Cloud Hosting
+                    </div>
+                    <h1 class="font-display text-3xl sm:text-5xl font-bold tracking-tight text-white leading-tight">
+                        Master <span class="bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent">Mathematics</span> & <span class="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Science</span> from Grade 1 to 12
+                    </h1>
+                    <p class="mt-3 text-slate-400 text-sm sm:text-base leading-relaxed">
+                        Explore interactive lessons, hands-on virtual physics & algebra simulations, and adaptive quizzes tailored for every single grade level.
+                    </p>
+                </div>
+
+                <!-- Quick Stats Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3 w-full lg:w-auto shrink-0">
+                    <div class="glass-card p-3.5 rounded-2xl border border-slate-800 text-center">
+                        <div class="text-2xl font-display font-bold text-indigo-400">12</div>
+                        <div class="text-xs text-slate-400">Grade Levels</div>
+                    </div>
+                    <div class="glass-card p-3.5 rounded-2xl border border-slate-800 text-center">
+                        <div class="text-2xl font-display font-bold text-emerald-400">48+</div>
+                        <div class="text-xs text-slate-400">Core Modules</div>
+                    </div>
+                    <div class="glass-card p-3.5 rounded-2xl border border-slate-800 text-center">
+                        <div class="text-2xl font-display font-bold text-amber-400">4</div>
+                        <div class="text-xs text-slate-400">Live Simulators</div>
+                    </div>
+                    <div class="glass-card p-3.5 rounded-2xl border border-slate-800 text-center">
+                        <div class="text-2xl font-display font-bold text-pink-400">100%</div>
+                        <div class="text-xs text-slate-400">Render Ready</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Dynamic Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- ==========================================
+             TAB 1: GRADE 1 - 12 CURRICULUM EXPLORER
+        =========================================== -->
+        <section id="tab-explorer" class="space-y-8">
+            <!-- Grade Selector Strip -->
+            <div class="glass-card p-4 sm:p-6 rounded-2xl border border-slate-800">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                    <div>
+                        <h2 class="text-lg sm:text-xl font-display font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-layer-group text-indigo-400"></i>
+                            Select Your Grade Level
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-400">Click any grade from 1 to 12 to load customized Science & Math modules</p>
+                    </div>
+
+                    <!-- Subject Filter & Search -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="relative flex-1 sm:w-56">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                            <input id="topic-search" type="text" oninput="renderCurriculumCards()" placeholder="Search topics (e.g. Calculus, DNA)..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-3 py-1.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <select id="subject-filter" onchange="renderCurriculumCards()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                            <option value="ALL">All Subjects</option>
+                            <option value="MATH">Mathematics Only</option>
+                            <option value="SCIENCE">Science Only</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 1-12 Grade Pills Grid -->
+                <div id="grade-buttons-container" class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-2">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Selected Grade Header Banner -->
+            <div id="grade-overview-banner" class="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-indigo-950/90 via-slate-900 to-emerald-950/80 border border-indigo-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <!-- Populated dynamically via JS -->
+            </div>
+
+            <!-- Topics Cards Grid (Mathematics & Science Columns) -->
+            <div id="curriculum-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Populated dynamically via JS -->
+            </div>
+        </section>
+
+        <!-- ==========================================
+             TAB 2: INTERACTIVE VIRTUAL MINI-LABS
+        =========================================== -->
+        <section id="tab-labs" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-card p-5 rounded-2xl border border-slate-800">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-display font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-microscope text-emerald-400"></i>
+                        Interactive STEM Virtual Mini-Labs
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-400">Hands-on visual simulations spanning Elementary Fractions to High School Physics & Algebra</p>
+                </div>
+                <!-- Lab Switcher Buttons -->
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="switchLab('graph')" id="lab-btn-graph" class="lab-tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 text-white shadow">
+                        <i class="fa-solid fa-wave-square mr-1"></i>Parabola & Trig Grapher
+                    </button>
+                    <button onclick="switchLab('pendulum')" id="lab-btn-pendulum" class="lab-tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">
+                        <i class="fa-solid fa-clock-rotate-left mr-1"></i>Gravity Pendulum
+                    </button>
+                    <button onclick="switchLab('fraction')" id="lab-btn-fraction" class="lab-tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">
+                        <i class="fa-solid fa-chart-pie mr-1"></i>Fraction Visualizer
+                    </button>
+                    <button onclick="switchLab('atom')" id="lab-btn-atom" class="lab-tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">
+                        <i class="fa-solid fa-atom mr-1"></i>Atom Builder
+                    </button>
+                </div>
+            </div>
+
+            <!-- LAB 1: INTERACTIVE PARABOLA & FUNCTION GRAPHER (Grades 8-12 Math) -->
+            <div id="lab-panel-graph" class="lab-panel grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300">Grades 8–12 Math</span>
+                        <button onclick="resetGraphLab()" class="text-xs text-slate-400 hover:text-white"><i class="fa-solid fa-rotate-left mr-1"></i>Reset</button>
+                    </div>
+                    <h3 class="text-lg font-display font-bold text-white">Quadratic & Wave Explorer</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Adjust coefficients <code class="text-indigo-300">a</code>, <code class="text-indigo-300">b</code>, and <code class="text-indigo-300">c</code> in real time to see how they transform the parabola <span class="text-white font-semibold">y = ax² + bx + c</span> and sine wave.
+                    </p>
+
+                    <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-center">
+                        <div class="text-xs text-slate-400 mb-1">Active Equation</div>
+                        <div id="graph-equation-display" class="font-mono text-base sm:text-lg font-bold text-indigo-300">y = 1.0x² + 0.0x - 2.0</div>
+                    </div>
+
+                    <!-- Sliders -->
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs font-medium mb-1">
+                                <span>Coefficient <strong class="text-indigo-400">a</strong> (Curvature)</span>
+                                <span id="val-a" class="font-mono text-indigo-300">1.0</span>
+                            </div>
+                            <input id="slider-a" type="range" min="-3" max="3" step="0.1" value="1" oninput="updateGraphLab()" class="w-full accent-indigo-500">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-medium mb-1">
+                                <span>Coefficient <strong class="text-emerald-400">b</strong> (Slope shift)</span>
+                                <span id="val-b" class="font-mono text-emerald-300">0.0</span>
+                            </div>
+                            <input id="slider-b" type="range" min="-5" max="5" step="0.2" value="0" oninput="updateGraphLab()" class="w-full accent-emerald-500">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-medium mb-1">
+                                <span>Constant <strong class="text-amber-400">c</strong> (Y-Intercept)</span>
+                                <span id="val-c" class="font-mono text-amber-300">-2.0</span>
+                            </div>
+                            <input id="slider-c" type="range" min="-6" max="6" step="0.5" value="-2" oninput="updateGraphLab()" class="w-full accent-amber-500">
+                        </div>
+                    </div>
+
+                    <!-- Computed Roots & Vertex Info -->
+                    <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1.5 text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Vertex (h, k):</span>
+                            <span id="graph-vertex" class="font-mono text-white font-semibold">(0.00, -2.00)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Discriminant (Δ):</span>
+                            <span id="graph-disc" class="font-mono text-emerald-400 font-semibold">8.00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Real Roots:</span>
+                            <span id="graph-roots" class="font-mono text-amber-300 font-semibold">x = ±1.41</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 glass-card p-4 rounded-2xl border border-slate-800 flex flex-col">
+                    <div class="flex items-center justify-between mb-2 px-2">
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-circle-dot text-amber-400 mr-1"></i>Yellow dot marks Vertex</span>
+                        <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="toggle-sine" onchange="updateGraphLab()" class="rounded accent-emerald-500">
+                            <span>Overlay Sine Wave <code class="text-emerald-400">y = a·sin(bx) + c</code></span>
+                        </label>
+                    </div>
+                    <div class="relative flex-1 min-h-[320px] sm:min-h-[400px] w-full bg-slate-950 rounded-xl overflow-hidden border border-slate-800">
+                        <canvas id="graphCanvas" class="w-full h-full block"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LAB 2: GRAVITY PENDULUM SIMULATOR (Grades 5-12 Science/Physics) -->
+            <div id="lab-panel-pendulum" class="lab-panel hidden grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300">Grades 5–12 Physics</span>
+                        <button onclick="resetPendulum()" class="text-xs text-slate-400 hover:text-white"><i class="fa-solid fa-rotate-left mr-1"></i>Release Again</button>
+                    </div>
+                    <h3 class="text-lg font-display font-bold text-white">Planetary Gravity & Harmonic Motion</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Test how string length and planetary gravity affect the oscillation period <span class="text-white font-mono">T = 2π√(L/g)</span>.
+                    </p>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Select Celestial Body (Gravity <code class="text-emerald-400">g</code>)</label>
+                            <select id="pendulum-planet" onchange="updatePendulumParams()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white">
+                                <option value="9.81">🌍 Earth (g = 9.81 m/s²)</option>
+                                <option value="1.62">🌙 Moon (g = 1.62 m/s²)</option>
+                                <option value="3.71">🔴 Mars (g = 3.71 m/s²)</option>
+                                <option value="24.79">🟠 Jupiter (g = 24.79 m/s²)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-medium mb-1">
+                                <span>Rod Length (<strong class="text-indigo-400">L</strong>)</span>
+                                <span id="val-pend-len" class="font-mono text-indigo-300">1.5 m</span>
+                            </div>
+                            <input id="slider-pend-len" type="range" min="0.5" max="2.5" step="0.1" value="1.5" oninput="updatePendulumParams()" class="w-full accent-indigo-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-medium mb-1">
+                                <span>Damping (Air Resistance)</span>
+                                <span id="val-pend-damp" class="font-mono text-amber-300">Low</span>
+                            </div>
+                            <input id="slider-pend-damp" type="range" min="0.990" max="1.000" step="0.002" value="0.998" oninput="updatePendulumParams()" class="w-full accent-amber-500">
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 space-y-1.5 text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Theoretical Period (T):</span>
+                            <span id="pend-period" class="font-mono text-emerald-400 font-bold">2.46 s</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Live Velocity:</span>
+                            <span id="pend-vel" class="font-mono text-indigo-300">0.00 rad/s</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 glass-card p-4 rounded-2xl border border-slate-800 flex flex-col">
+                    <div class="text-xs text-slate-400 mb-2 px-2 flex justify-between">
+                        <span>Click "Release Again" or adjust sliders to observe energy conservation</span>
+                        <span class="text-emerald-400 font-semibold">Live Physics Engine</span>
+                    </div>
+                    <div class="relative flex-1 min-h-[320px] sm:min-h-[400px] w-full bg-slate-950 rounded-xl overflow-hidden border border-slate-800">
+                        <canvas id="pendulumCanvas" class="w-full h-full block"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LAB 3: FRACTION & RATIO VISUALIZER (Grades 1-5 Math) -->
+            <div id="lab-panel-fraction" class="lab-panel hidden grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-5">
+                    <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300">Grades 1–5 Math</span>
+                    <h3 class="text-lg font-display font-bold text-white">Interactive Fraction & Percentage Pizza</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Great for younger learners! Change the numerator and denominator to see how fractions, decimals, and percentages relate.
+                    </p>
+
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs font-medium mb-1">
+                                <span>Numerator (Shaded Slices)</span>
+                                <span id="val-num" class="font-mono text-amber-300 font-bold">3</span>
+                            </div>
+                            <input id="slider-num" type="range" min="0" max="8" step="1" value="3" oninput="updateFractionLab()" class="w-full accent-amber-500">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-medium mb-1">
+                                <span>Denominator (Total Slices)</span>
+                                <span id="val-den" class="font-mono text-indigo-300 font-bold">8</span>
+                            </div>
+                            <input id="slider-den" type="range" min="1" max="12" step="1" value="8" oninput="updateFractionLab()" class="w-full accent-indigo-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 text-center pt-2">
+                        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                            <div class="text-[11px] text-slate-400">Fraction</div>
+                            <div id="frac-display" class="text-lg font-display font-bold text-amber-400">3 / 8</div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                            <div class="text-[11px] text-slate-400">Decimal</div>
+                            <div id="dec-display" class="text-lg font-display font-bold text-indigo-400">0.375</div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                            <div class="text-[11px] text-slate-400">Percent</div>
+                            <div id="pct-display" class="text-lg font-display font-bold text-emerald-400">37.5%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 glass-card p-6 rounded-2xl border border-slate-800 flex flex-col items-center justify-center">
+                    <div id="fraction-svg-wrapper" class="w-64 h-64 sm:w-80 sm:h-80 flex items-center justify-center">
+                        <!-- Dynamic SVG Pie Rendered by JS -->
+                    </div>
+                    <p id="fraction-verbal" class="mt-4 text-sm font-medium text-slate-300 text-center"></p>
+                </div>
+            </div>
+
+            <!-- LAB 4: BOHR ATOM BUILDER (Grades 6-12 Chemistry) -->
+            <div id="lab-panel-atom" class="lab-panel hidden grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-5">
+                    <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-300">Grades 6–12 Chemistry</span>
+                    <h3 class="text-lg font-display font-bold text-white">Bohr Model Atom Builder</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Add or remove Protons, Neutrons, and Electrons to discover elements 1–10 on the Periodic Table and see electron shell configurations (2-8 rule).
+                    </p>
+
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs font-medium mb-1">
+                                <span class="text-rose-400 font-semibold">Protons (+ charge, Atomic #)</span>
+                                <span id="val-protons" class="font-mono text-rose-300 font-bold">6</span>
+                            </div>
+                            <input id="slider-protons" type="range" min="1" max="10" step="1" value="6" oninput="updateAtomLab()" class="w-full accent-rose-500">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-medium mb-1">
+                                <span class="text-slate-300 font-semibold">Neutrons (Neutral)</span>
+                                <span id="val-neutrons" class="font-mono text-slate-300 font-bold">6</span>
+                            </div>
+                            <input id="slider-neutrons" type="range" min="0" max="12" step="1" value="6" oninput="updateAtomLab()" class="w-full accent-slate-400">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-medium mb-1">
+                                <span class="text-cyan-400 font-semibold">Electrons (- charge, Shells)</span>
+                                <span id="val-electrons" class="font-mono text-cyan-300 font-bold">6</span>
+                            </div>
+                            <input id="slider-electrons" type="range" min="1" max="10" step="1" value="6" oninput="updateAtomLab()" class="w-full accent-cyan-400">
+                        </div>
+                    </div>
+
+                    <div id="element-card" class="p-4 rounded-2xl bg-slate-900 border border-slate-700 flex items-center justify-between">
+                        <!-- Element badge populated by JS -->
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 glass-card p-6 rounded-2xl border border-slate-800 flex flex-col items-center justify-center">
+                    <div id="atom-svg-wrapper" class="w-72 h-72 sm:w-80 sm:h-80 flex items-center justify-center">
+                        <!-- Dynamic Bohr Atom SVG rendered by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             TAB 3: GRADE-SPECIFIC INTERACTIVE QUIZ ARENA
+        =========================================== -->
+        <section id="tab-quiz" class="hidden space-y-6">
+            <div class="glass-card p-6 rounded-2xl border border-slate-800">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300">Knowledge Check</span>
+                        <h2 class="text-xl sm:text-2xl font-display font-bold text-white mt-2">Grade-Level STEM Challenge Arena</h2>
+                        <p class="text-xs sm:text-sm text-slate-400">Test your mastery of both Mathematics and Science for your selected grade.</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <label class="text-xs text-slate-400">Quiz Grade:</label>
+                        <select id="quiz-grade-select" onchange="loadQuizForGrade(this.value)" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm font-semibold text-white">
+                            <!-- Populated 1-12 via JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Active Quiz Box -->
+                <div id="quiz-container" class="py-6 max-w-3xl mx-auto space-y-6">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==========================================
+         MODAL: LESSON INTERACTIVE READER
+    =========================================== -->
+    <div id="lesson-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-card border border-slate-700 rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <span id="modal-badge" class="text-xs font-bold uppercase px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300">Grade 1 • Math</span>
+                    <h3 id="modal-title" class="text-xl sm:text-2xl font-display font-bold text-white mt-2">Topic Title</h3>
+                </div>
+                <button onclick="closeLessonModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="modal-body" class="space-y-4 text-sm text-slate-300 leading-relaxed">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div class="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                <button onclick="openSuggestedLab()" class="px-4 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30 text-xs sm:text-sm font-semibold">
+                    <i class="fa-solid fa-flask mr-1.5"></i>Open Matching Virtual Lab
+                </button>
+                <button onclick="completeLessonXP()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold shadow-lg">
+                    <i class="fa-solid fa-check mr-1.5"></i>Mark Completed (+25 XP)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL: DEPLOY ON RENDER (ONRENDER) BLUEPRINT
+    =========================================== -->
+    <div id="render-modal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-card border border-emerald-500/40 rounded-2xl max-w-3xl w-full p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                        <i class="fa-solid fa-server text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-display font-bold text-white">Host on Render.com (`onrender.com`) Guide</h3>
+                        <p class="text-xs text-slate-400">Deploy this K-12 Science & Math portal as a free Render Static Site or Node Web Service in 2 minutes.</p>
+                    </div>
+                </div>
+                <button onclick="closeRenderModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Step-by-Step Instructions -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                    <div class="font-bold text-emerald-400 mb-1">1. Push to GitHub / GitLab</div>
+                    <p class="text-slate-400">Save this file as <code class="text-white">index.html</code> alongside the <code class="text-white">render.yaml</code> file below in a new Git repository.</p>
+                </div>
+                <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                    <div class="font-bold text-indigo-400 mb-1">2. Connect on Render.com</div>
+                    <p class="text-slate-400">Log into <span class="text-white font-medium">dashboard.render.com</span>, click <strong>New + &rarr; Static Site</strong> (or Blueprint) and pick your repository.</p>
+                </div>
+                <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                    <div class="font-bold text-amber-400 mb-1">3. Live `.onrender.com` URL</div>
+                    <p class="text-slate-400">Set Publish Directory to <code class="text-white">.</code> (root). Render builds & serves your site globally on <code class="text-emerald-300">https://stemverse-k12.onrender.com</code>!</p>
+                </div>
+            </div>
+
+            <!-- Copyable render.yaml Blueprint -->
+            <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-300"><i class="fa-solid fa-file-code text-emerald-400 mr-1.5"></i>render.yaml (Zero-Config Render Blueprint)</span>
+                    <button onclick="copyCodeBlock('render-yaml-code')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 font-medium">
+                        <i class="fa-regular fa-copy mr-1"></i>Copy render.yaml
+                    </button>
+                </div>
+                <pre id="render-yaml-code" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-mono text-emerald-300 overflow-x-auto">services:
+  - type: web
+    name: stemverse-k12-portal
+    runtime: static
+    buildCommand: echo "Static K-12 Portal Ready"
+    staticPublishPath: .
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html</pre>
+            </div>
+
+            <!-- Optional Express Server for Render Web Service -->
+            <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-300"><i class="fa-brands fa-node-js text-indigo-400 mr-1.5"></i>Optional: server.js (If hosting as a Render Node.js Web Service)</span>
+                    <button onclick="copyCodeBlock('render-node-code')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-300 font-medium">
+                        <i class="fa-regular fa-copy mr-1"></i>Copy server.js
+                    </button>
+                </div>
+                <pre id="render-node-code" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-mono text-indigo-300 overflow-x-auto">const express = require('express');
+const path = require('path');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.static(__dirname));
+app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+
+app.listen(PORT, () => console.log(`StemVerse live on port ${PORT}`));</pre>
+            </div>
+
+            <div class="flex justify-end">
+                <button onclick="closeRenderModal()" class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs sm:text-sm">
+                    Got It, Back to Learning
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 bg-slate-950 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-atom text-indigo-400"></i>
+                <span><strong class="text-slate-300">StemVerse K-12</strong> • Interactive Science & Mathematics Curriculum (Grades 1–12)</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="openRenderModal()" class="hover:text-emerald-400 transition">Render.com Blueprint</button>
+                <span>•</span>
+                <button onclick="switchMainTab('labs')" class="hover:text-indigo-400 transition">Interactive Simulators</button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==========================================
+         APPLICATION JAVASCRIPT & SIMULATION ENGINES
+    =========================================== -->
+    <script>
+        // --- COMPLETE GRADES 1 TO 12 SCIENCE & MATHEMATICS DATASET ---
+        const CURRICULUM_DATA = {
+            1: {
+                level: "Elementary School",
+                tagline: "Foundations of Numbers, Shapes, Living Things & Daily Weather",
+                math: [
+                    { title: "Counting & Place Value (1–100)", formula: "14 = 1 Ten + 4 Ones", desc: "Understand tens and ones, skip-counting by 2s, 5s, and 10s, and comparing two-digit numbers.", example: "If you bundle 10 sticks together and have 7 loose sticks, you have 17 sticks total.", lab: "fraction" },
+                    { title: "Addition & Subtraction Within 20", formula: "8 + 6 = 14  |  14 - 6 = 8", desc: "Master fact families, number lines, and making 10 to add and subtract quickly.", example: "To solve 8 + 5, take 2 from 5 to make 10, then add 3 to get 13.", lab: "fraction" }
+                ],
+                science: [
+                    { title: "Plants, Animals & Habitats", formula: "Sunlight + Water + Soil → Growth", desc: "Explore how roots, stems, and leaves help plants grow, and how animals adapt to forests, oceans, and deserts.", example: "Cacti store water in thick stems to survive dry desert climates.", lab: "atom" },
+                    { title: "Seasons & Daily Sky Patterns", formula: "Day / Night Cycle = 24 Hours", desc: "Observe how the Sun appears to move across the sky and how weather changes across Spring, Summer, Autumn, and Winter.", example: "Shadows are longest in the early morning and late afternoon, and shortest at noon.", lab: "pendulum" }
+                ],
+                quiz: [
+                    { q: "What is 10 + 7?", options: ["15", "17", "71", "18"], ans: 1 },
+                    { q: "Which part of a plant absorbs water from the soil?", options: ["Petals", "Roots", "Seeds", "Bark"], ans: 1 },
+                    { q: "How many tens are in the number 42?", options: ["2", "4", "6", "40"], ans: 1 }
+                ]
+            },
+            2: {
+                level: "Elementary School",
+                tagline: "Three-Digit Addition, Standard Measurement, States of Matter & Life Cycles",
+                math: [
+                    { title: "Place Value to 1,000 & Money", formula: "100¢ = $1.00", desc: "Read and write numbers up to 1,000 using hundreds, tens, and ones, and count combinations of coins.", example: "3 Quarters (75¢) + 2 Dimes (20¢) + 1 Nickel (5¢) = 100¢ ($1.00).", lab: "fraction" },
+                    { title: "2D Geometry & Equal Shares", formula: "Halves (1/2), Thirds (1/3), Fourths (1/4)", desc: "Partition rectangles and circles into equal shares, laying the visual foundation for fractions.", example: "Cutting a pizza into 4 equal slices means each slice is one-fourth (1/4).", lab: "fraction" }
+                ],
+                science: [
+                    { title: "States of Matter: Solid, Liquid, Gas", formula: "Ice (Solid) ⇄ Water (Liquid) ⇄ Steam (Gas)", desc: "Investigate how heating and cooling can change materials from solid to liquid or gas.", example: "Melting butter in a warm pan turns a solid into a liquid.", lab: "atom" },
+                    { title: "Butterfly & Frog Life Cycles", formula: "Egg → Larva → Pupa → Adult", desc: "Trace metamorphosis in insects and amphibians and how pollination helps plants make seeds.", example: "A caterpillar forms a chrysalis (pupa) before emerging as a butterfly.", lab: "atom" }
+                ],
+                quiz: [
+                    { q: "If a circle is cut into 4 equal pieces, what is 1 piece called?", options: ["One-half", "One-third", "One-fourth", "One-whole"], ans: 2 },
+                    { q: "Water freezing into ice is a change from:", options: ["Liquid to Solid", "Gas to Liquid", "Solid to Gas", "Solid to Liquid"], ans: 0 },
+                    { q: "What is 340 + 200?", options: ["360", "540", "440", "640"], ans: 1 }
+                ]
+            },
+            3: {
+                level: "Elementary School",
+                tagline: "Multiplication, Unit Fractions, Forces & Magnetic Interactions",
+                math: [
+                    { title: "Multiplication & Division Concepts", formula: "6 × 4 = 24  ⇔  24 ÷ 6 = 4", desc: "Use equal groups and arrays to multiply and divide whole numbers within 100.", example: "4 rows of 6 chairs gives 4 × 6 = 24 chairs in total.", lab: "fraction" },
+                    { title: "Visualizing Fractions on a Number Line", formula: "2/4 = 1/2", desc: "Understand numerators and denominators and discover equivalent fractions using pie models.", example: "3/6 of a pie covers the exact same area as 1/2 of the pie.", lab: "fraction" }
+                ],
+                science: [
+                    { title: "Forces, Motion & Magnetism", formula: "Balanced Forces → Net Force = 0", desc: "Explore pushes, pulls, friction, and how magnetic poles attract (N-S) or repel (N-N).", example: "Two North poles of a magnet push away from each other without touching.", lab: "pendulum" },
+                    { title: "Weather & Climate Zones", formula: "Precipitation + Temperature = Climate", desc: "Distinguish daily weather changes from long-term tropical, temperate, and polar climates.", example: "An anemometer measures wind speed while a barometer measures air pressure.", lab: "pendulum" }
+                ],
+                quiz: [
+                    { q: "Which fraction is equivalent to 1/2?", options: ["1/4", "2/4", "3/4", "2/3"], ans: 1 },
+                    { q: "What happens when two North poles of magnets are brought close?", options: ["They attract", "They repel", "They melt", "Nothing happens"], ans: 1 },
+                    { q: "What is 7 × 8?", options: ["54", "56", "64", "48"], ans: 1 }
+                ]
+            },
+            4: {
+                level: "Elementary School",
+                tagline: "Multi-Digit Operations, Decimals, Energy Transfer & Rock Layers",
+                math: [
+                    { title: "Multi-Digit Multiplication & Long Division", formula: "Area = Length × Width", desc: "Multiply four-digit numbers and divide with remainders using area models and partial products.", example: "24 × 15 = (20×15) + (4×15) = 300 + 60 = 360.", lab: "fraction" },
+                    { title: "Decimals & Fraction Operations", formula: "3/10 + 25/100 = 0.55", desc: "Convert tenths and hundredths to decimal notation and compare decimal values.", example: "0.7 is greater than 0.65 because 70/100 > 65/100.", lab: "fraction" }
+                ],
+                science: [
+                    { title: "Energy Forms, Sound & Light Waves", formula: "Kinetic Energy ⇄ Potential Energy", desc: "See how energy transfers through sound vibrations, light reflection, and simple electrical circuits.", example: "A rollercoaster at the top of a hill has maximum gravitational potential energy.", lab: "pendulum" },
+                    { title: "Rocks, Weathering & Earth's Surface", formula: "Igneous → Sedimentary → Metamorphic", desc: "Examine how wind, water, and ice erode landforms and how fossils reveal ancient environments.", example: "Grand Canyon rock layers show millions of years of water erosion.", lab: "atom" }
+                ],
+                quiz: [
+                    { q: "How is the fraction 7/10 written as a decimal?", options: ["0.07", "0.7", "7.0", "0.77"], ans: 1 },
+                    { q: "Which type of rock forms from cooled lava or magma?", options: ["Sedimentary", "Igneous", "Metamorphic", "Fossil"], ans: 1 },
+                    { q: "What is the area of a rectangle with length 12 cm and width 5 cm?", options: ["17 cm²", "34 cm²", "60 cm²", "55 cm²"], ans: 2 }
+                ]
+            },
+            5: {
+                level: "Upper Elementary",
+                tagline: "3D Volume, Uncommon Denominators, Ecosystems & Solar System",
+                math: [
+                    { title: "Adding Fractions with Unlike Denominators", formula: "1/3 + 1/4 = 4/12 + 3/12 = 7/12", desc: "Find least common denominators (LCD) to add, subtract, and multiply fractions.", example: "To add 1/2 + 1/5, convert both to tenths: 5/10 + 2/10 = 7/10.", lab: "fraction" },
+                    { title: "Volume of 3D Prisms & Coordinate Plane", formula: "V = l × w × h", desc: "Plot ordered pairs (x, y) in the first quadrant and calculate cubic volume of rectangular prisms.", example: "A box 4m long, 3m wide, and 2m high holds 4 × 3 × 2 = 24 m³.", lab: "graph" }
+                ],
+                science: [
+                    { title: "Matter Conservation & Chemical Changes", formula: "Mass(Reactants) = Mass(Products)", desc: "Investigate mixtures vs. chemical reactions and see why total mass stays constant.", example: "When baking soda and vinegar react, gas bubbles form—a new substance.", lab: "atom" },
+                    { title: "Food Webs & Planetary Gravity", formula: "Sun → Producers → Consumers → Decomposers", desc: "Trace how matter cycles through ecosystems and how Earth's gravity pulls objects toward its center.", example: "Plants convert sunlight, water, and CO₂ into glucose through photosynthesis.", lab: "pendulum" }
+                ],
+                quiz: [
+                    { q: "What is the volume of a cube with side length 3 cm?", options: ["9 cm³", "18 cm³", "27 cm³", "12 cm³"], ans: 2 },
+                    { q: "In a food web, green plants are classified as:", options: ["Decomposers", "Producers", "Carnivores", "Primary Consumers"], ans: 1 },
+                    { q: "What is 1/2 + 1/3?", options: ["2/5", "5/6", "1/6", "3/5"], ans: 1 }
+                ]
+            },
+            6: {
+                level: "Middle School",
+                tagline: "Ratios, Algebraic Expressions, Cell Biology & Earth's Atmosphere",
+                math: [
+                    { title: "Ratios, Unit Rates & Percentages", formula: "Part / Whole = Percent / 100", desc: "Solve real-world speed, price, and proportion problems using ratio tables and percent bars.", example: "If 4 notebooks cost $12, the unit rate is $3 per notebook.", lab: "fraction" },
+                    { title: "Intro to Algebraic Variables & Inequalities", formula: "3x + 5 = 20  ⇒  x = 5", desc: "Evaluate expressions with exponents, write one-step equations, and graph negative integers.", example: "If x = 4, then 2x² - 3 evaluates to 2(16) - 3 = 29.", lab: "graph" }
+                ],
+                science: [
+                    { title: "Cell Structure & Organelles", formula: "Cells → Tissues → Organs → Systems", desc: "Compare plant and animal cells and learn the roles of the nucleus, mitochondria, and chloroplasts.", example: "Mitochondria are the powerhouses of the cell, generating ATP energy.", lab: "atom" },
+                    { title: "Plate Tectonics & Thermal Energy", formula: "Conduction • Convection • Radiation", desc: "Understand how convection currents in Earth's mantle drive continental drift and earthquakes.", example: "Warm air rising and cool air sinking creates a convection current in the atmosphere.", lab: "pendulum" }
+                ],
+                quiz: [
+                    { q: "Solve for x:  4x + 6 = 26", options: ["x = 4", "x = 5", "x = 6", "x = 8"], ans: 1 },
+                    { q: "Which organelle is present in plant cells for photosynthesis but NOT in animal cells?", options: ["Nucleus", "Ribosome", "Chloroplast", "Cell Membrane"], ans: 2 },
+                    { q: "What is 25% of 80?", options: ["15", "20", "25", "40"], ans: 1 }
+                ]
+            },
+            7: {
+                level: "Middle School",
+                tagline: "Proportional Relationships, Circle Geometry, Genetics & Chemical Reactions",
+                math: [
+                    { title: "Proportional Equations & Linear Slope", formula: "y = kx   (Constant of Proportionality k)", desc: "Analyze proportional graphs passing through the origin and solve multi-step percent markup/discount problems.", example: "A 20% discount on a $50 jacket saves $10, making the final price $40.", lab: "graph" },
+                    { title: "Circles: Circumference, Area & Probability", formula: "C = 2πr   |   A = πr²", desc: "Calculate area and circumference of circles and model compound probability events.", example: "A circle with radius r = 5 has Area = 25π ≈ 78.54 square units.", lab: "graph" }
+                ],
+                science: [
+                    { title: "Genetics, DNA & Punnett Squares", formula: "Dominant (A) vs. Recessive (a) Alleles", desc: "Predict offspring traits using Punnett squares and distinguish asexual vs. sexual reproduction.", example: "Crossing Aa × Aa yields a 75% chance of the dominant trait (AA, Aa) and 25% recessive (aa).", lab: "atom" },
+                    { title: "Atoms, Elements & Endothermic Reactions", formula: "6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂", desc: "Build atomic models and analyze how chemical bonds absorb or release thermal energy.", example: "Cellular respiration breaks down glucose with oxygen to release energy for body cells.", lab: "atom" }
+                ],
+                quiz: [
+                    { q: "What is the area of a circle with radius r = 4? (Use π ≈ 3.14)", options: ["25.12", "50.24", "12.56", "16.00"], ans: 1 },
+                    { q: "In a Punnett square cross between Bb and Bb, what percentage of offspring are homozygous recessive (bb)?", options: ["0%", "25%", "50%", "75%"], ans: 1 },
+                    { q: "Solve: -3(x - 4) = 15", options: ["x = -1", "x = 1", "x = -9", "x = 9"], ans: 0 }
+                ]
+            },
+            8: {
+                level: "Middle School",
+                tagline: "Linear Systems, Pythagorean Theorem, Newton's Laws & Periodic Table",
+                math: [
+                    { title: "Linear Functions & Systems of Equations", formula: "y = mx + b   |   m = (y₂ - y₁)/(x₂ - x₁)", desc: "Graph lines using slope-intercept form and find the intersection of two linear equations.", example: "The lines y = 2x + 1 and y = -x + 7 intersect at (2, 5).", lab: "graph" },
+                    { title: "Pythagorean Theorem & Exponents", formula: "a² + b² = c²", desc: "Find missing sides of right triangles, work with scientific notation, and evaluate square/cube roots.", example: "A right triangle with legs 3 and 4 has hypotenuse c = √(9 + 16) = 5.", lab: "graph" }
+                ],
+                science: [
+                    { title: "Newton's Three Laws of Motion", formula: "F_net = m · a", desc: "Calculate net force, acceleration, and momentum, and explore action-reaction force pairs.", example: "Pushing a 10 kg sled with 30 N of net force produces an acceleration of 3 m/s².", lab: "pendulum" },
+                    { title: "Periodic Table & Bohr Atomic Shells", formula: "Atomic Number (Z) = Protons", desc: "Identify valence electrons, atomic mass, and reactivity across groups and periods.", example: "Carbon (Z=6) has 2 electrons in its inner shell and 4 valence electrons in its outer shell.", lab: "atom" }
+                ],
+                quiz: [
+                    { q: "A right triangle has legs of 6 cm and 8 cm. What is the hypotenuse?", options: ["10 cm", "12 cm", "14 cm", "100 cm"], ans: 0 },
+                    { q: "According to Newton's Second Law (F = ma), what force accelerates a 5 kg mass at 4 m/s²?", options: ["1.25 N", "9 N", "20 N", "25 N"], ans: 2 },
+                    { q: "How many valence electrons does Oxygen (Atomic #8) have?", options: ["2", "4", "6", "8"], ans: 2 }
+                ]
+            },
+            9: {
+                level: "High School (Freshman)",
+                tagline: "Algebra I Quadratics, Exponential Growth, Cellular Biology & Kinematics",
+                math: [
+                    { title: "Quadratic Functions & Parabola Graphing", formula: "y = ax² + bx + c   |   x = [-b ± √(b² - 4ac)] / 2a", desc: "Factor trinomials, complete the square, and find roots and vertices of parabolas.", example: "x² - 5x + 6 = 0 factors into (x - 2)(x - 3) = 0, giving roots x = 2 and x = 3.", lab: "graph" },
+                    { title: "Exponential Growth & Decay Models", formula: "y = a(1 + r)^t", desc: "Model compound interest, population growth, and radioactive half-life using exponential functions.", example: "$1,000 invested at 10% annual interest grows to $1,000(1.10)² = $1,210 in 2 years.", lab: "graph" }
+                ],
+                science: [
+                    { title: "Molecular Biology: DNA Replication & Mitosis", formula: "DNA → mRNA → Protein (Central Dogma)", desc: "Explore transcription, translation, enzyme catalysis, and how cells divide via mitosis and meiosis.", example: "In DNA base pairing, Adenine (A) always pairs with Thymine (T), and Cytosine (C) with Guanine (G).", lab: "atom" },
+                    { title: "1D Kinematics & Conservation of Energy", formula: "KE = ½mv²   |   PE = mgh", desc: "Analyze velocity-time graphs and calculate mechanical energy transformations in pendulums.", example: "Doubling the velocity of a moving car quadruples its kinetic energy.", lab: "pendulum" }
+                ],
+                quiz: [
+                    { q: "What are the x-intercepts (roots) of y = x² - 9?", options: ["x = 3 only", "x = 3 and x = -3", "x = 9 and x = -9", "No real roots"], ans: 1 },
+                    { q: "In DNA, Cytosine (C) always pairs with which nitrogenous base?", options: ["Adenine (A)", "Thymine (T)", "Uracil (U)", "Guanine (G)"], ans: 3 },
+                    { q: "If a 2 kg ball moves at 3 m/s, what is its Kinetic Energy (KE = ½mv²)?", options: ["3 J", "6 J", "9 J", "18 J"], ans: 2 }
+                ]
+            },
+            10: {
+                level: "High School (Sophomore)",
+                tagline: "Euclidean Geometry, Right-Triangle Trigonometry, Stoichiometry & Bonding",
+                math: [
+                    { title: "Right-Triangle Trigonometry (SOH-CAH-TOA)", formula: "sin(θ) = Opp/Hyp  •  cos(θ) = Adj/Hyp  •  tan(θ) = Opp/Adj", desc: "Use sine, cosine, and tangent ratios plus Laws of Sines & Cosines to solve geometric problems.", example: "In a 30°-60°-90° triangle, sin(30°) = 0.5.", lab: "graph" },
+                    { title: "Geometric Proofs, Circles & Conic Sections", formula: "(x - h)² + (y - k)² = r²", desc: "Prove triangle congruence (SSS, SAS, ASA), arc lengths, sector areas, and circle equations.", example: "(x - 2)² + (y + 3)² = 25 is a circle centered at (2, -3) with radius 5.", lab: "graph" }
+                ],
+                science: [
+                    { title: "Ionic & Covalent Bonding & Periodic Trends", formula: "Electronegativity & Octet Rule", desc: "Predict Lewis dot structures, molecular polarity, and ionic vs. covalent bond formation.", example: "Sodium (Na) transfers 1 valence electron to Chlorine (Cl) to form an ionic bond (NaCl).", lab: "atom" },
+                    { title: "Chemical Stoichiometry & The Mole", formula: "1 Mole = 6.022 × 10²³ particles   |   n = m / M", desc: "Balance chemical equations, determine limiting reactants, and calculate molar mass yields.", example: "1 mole of H₂O (molar mass 18 g/mol) has a mass of 18 grams.", lab: "atom" }
+                ],
+                quiz: [
+                    { q: "In a right triangle, if Opposite = 3 and Hypotenuse = 5, what is sin(θ)?", options: ["3/4", "4/5", "3/5", "5/3"], ans: 2 },
+                    { q: "What type of bond forms when two nonmetal atoms SHARE electrons?", options: ["Ionic bond", "Covalent bond", "Metallic bond", "Nuclear bond"], ans: 1 },
+                    { q: "What is the radius of the circle (x - 1)² + (y + 4)² = 49?", options: ["7", "14", "49", "24.5"], ans: 0 }
+                ]
+            },
+            11: {
+                level: "High School (Junior)",
+                tagline: "Algebra II, Trigonometric Waves, Logarithms, Mechanics & Gas Laws",
+                math: [
+                    { title: "Trigonometric Functions & Unit Circle Waves", formula: "y = A·sin(Bx + C) + D   |   sin²θ + cos²θ = 1", desc: "Graph periodic sine and cosine waves in radians, analyzing amplitude, frequency, and phase shifts.", example: "y = 3sin(2x) has an amplitude of 3 and a period of 2π / 2 = π.", lab: "graph" },
+                    { title: "Logarithms, Polynomials & Complex Numbers", formula: "log_b(x) = y  ⇔  b^y = x   |   i² = -1", desc: "Solve logarithmic equations, divide higher-order polynomials, and operate with imaginary numbers.", example: "log₂(32) = 5 because 2⁵ = 32.", lab: "graph" }
+                ],
+                science: [
+                    { title: "Classical Mechanics, Work & Simple Harmonic Motion", formula: "T = 2π√(L/g)   |   W = F·d·cos(θ)", desc: "Model pendulum oscillations, projectile trajectories, centripetal force, and wave interference.", example: "On Earth (g = 9.81 m/s²), a 1-meter pendulum has a period of ~2.01 seconds.", lab: "pendulum" },
+                    { title: "Ideal Gas Law, Acids/Bases & Thermochemistry", formula: "PV = nRT   |   pH = -log[H⁺]", desc: "Calculate gas pressure/volume changes, titration pH curves, and enthalpy (ΔH) of reactions.", example: "A solution with [H⁺] = 10⁻³ M has a pH of 3 (acidic).", lab: "atom" }
+                ],
+                quiz: [
+                    { q: "What is the value of log₁₀(1,000)?", options: ["2", "3", "10", "100"], ans: 1 },
+                    { q: "In simple harmonic motion of a pendulum T = 2π√(L/g), if gravity (g) decreases (like on the Moon), the period T:", options: ["Increases (swings slower)", "Decreases (swings faster)", "Stays the same", "Becomes zero"], ans: 0 },
+                    { q: "What is the amplitude of the wave y = -4·sin(3x) + 1?", options: ["1", "3", "4", "-4"], ans: 2 }
+                ]
+            },
+            12: {
+                level: "High School (Senior / AP Prep)",
+                tagline: "Differential & Integral Calculus, Electromagnetism, Quantum & Organic Chemistry",
+                math: [
+                    { title: "Differential Calculus: Limits & Derivatives", formula: "f'(x) = lim(h→0) [f(x+h) - f(x)] / h", desc: "Find instantaneous rates of change, tangent lines, and optimization maxima/minima using power, product, and chain rules.", example: "If f(x) = x³ - 6x, the derivative is f'(x) = 3x² - 6.", lab: "graph" },
+                    { title: "Integral Calculus & Fundamental Theorem", formula: "∫[a to b] f(x) dx = F(b) - F(a)", desc: "Compute areas under curves and volumes of revolution using antiderivatives and Riemann sums.", example: "∫ (2x) dx from 0 to 3 equals [x²]₀³ = 9 - 0 = 9.", lab: "graph" }
+                ],
+                science: [
+                    { title: "Electromagnetism, Circuits & Modern Quantum Physics", formula: "V = I·R   |   E = h·f = mc²", desc: "Analyze RC/RL circuits, Faraday's magnetic induction, photoelectric effect, and mass-energy equivalence.", example: "Photons with higher frequency carry proportionally greater quantum energy E = hf.", lab: "pendulum" },
+                    { title: "Chemical Equilibrium, Kinetics & Organic Functional Groups", formula: "ΔG = ΔH - TΔS   |   K_eq = [Products]/[Reactants]", desc: "Determine reaction spontaneity (Gibbs Free Energy), Le Chatelier's shifts, and organic hydrocarbon structures.", example: "A reaction with ΔG < 0 is thermodynamically spontaneous.", lab: "atom" }
+                ],
+                quiz: [
+                    { q: "What is the first derivative f'(x) of f(x) = 4x³ - 5x + 2?", options: ["12x² - 5", "4x² - 5", "x⁴ - 5", "12x³ - 5"], ans: 0 },
+                    { q: "A reaction is spontaneous at a given temperature when Gibbs Free Energy (ΔG) is:", options: ["ΔG > 0", "ΔG < 0", "ΔG = 0", "Unrelated to ΔG"], ans: 1 },
+                    { q: "Evaluate the definite integral ∫₀² (3x²) dx:", options: ["4", "6", "8", "12"], ans: 2 }
+                ]
+            }
+        };
+
+        // Periodic Table Elements 1-10 for Lab 4
+        const ELEMENTS_DB = {
+            1: { sym: "H", name: "Hydrogen", group: "Reactive Nonmetal" },
+            2: { sym: "He", name: "Helium", group: "Noble Gas" },
+            3: { sym: "Li", name: "Lithium", group: "Alkali Metal" },
+            4: { sym: "Be", name: "Beryllium", group: "Alkaline Earth Metal" },
+            5: { sym: "B", name: "Boron", group: "Metalloid" },
+            6: { sym: "C", name: "Carbon", group: "Nonmetal (Life Basis)" },
+            7: { sym: "N", name: "Nitrogen", group: "Pnictogen Nonmetal" },
+            8: { sym: "O", name: "Oxygen", group: "Chalcogen Nonmetal" },
+            9: { sym: "F", name: "Fluorine", group: "Halogen" },
+            10: { sym: "Ne", name: "Neon", group: "Noble Gas" }
+        };
+
+        // --- GLOBAL APPLICATION STATE ---
+        let currentGrade = 8;
+        let currentXP = 120;
+        let activeLessonLab = 'graph';
+        let pendulumAnimId = null;
+
+        // --- TOAST NOTIFICATION HELPER ---
+        function showToast(message, icon = "fa-circle-check", colorClass = "border-emerald-500/50 text-emerald-300") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `glass-card px-4 py-3 rounded-xl border ${colorClass} shadow-xl flex items-center gap-2.5 text-xs sm:text-sm font-medium transition-all duration-300 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function addXP(amount, reason) {
+            currentXP += amount;
+            document.getElementById('user-xp').textContent = `${currentXP} XP`;
+            showToast(`+${amount} XP! ${reason}`, "fa-bolt", "border-amber-400/60 text-amber-300");
+        }
+
+        // --- TAB NAVIGATION ---
+        function switchMainTab(tabName) {
+            ['explorer', 'labs', 'quiz'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tabName);
+                const deskBtn = document.getElementById(`nav-${t}`);
+                const mobBtn = document.getElementById(`mob-nav-${t}`);
+                if (t === tabName) {
+                    deskBtn.className = "nav-btn px-4 py-2 rounded-lg text-sm font-medium transition-all bg-indigo-600 text-white shadow";
+                    mobBtn.className = "flex-1 py-1.5 text-center rounded-lg text-xs font-semibold bg-indigo-600 text-white";
+                } else {
+                    deskBtn.className = "nav-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white transition-all";
+                    mobBtn.className = "flex-1 py-1.5 text-center rounded-lg text-xs font-semibold text-slate-400";
+                }
+            });
+
+            if (tabName === 'labs') {
+                setTimeout(() => {
+                    resizeAndDrawGraph();
+                    resizePendulumCanvas();
+                }, 60);
+            } else if (tabName === 'quiz') {
+                document.getElementById('quiz-grade-select').value = currentGrade;
+                loadQuizForGrade(currentGrade);
+            }
+        }
+
+        // --- GRADE 1-12 EXPLORER RENDERING ---
+        function initGradeSelector() {
+            const container = document.getElementById('grade-buttons-container');
+            const quizSelect = document.getElementById('quiz-grade-select');
+            container.innerHTML = '';
+            quizSelect.innerHTML = '';
+
+            for (let g = 1; g <= 12; g++) {
+                const isSelected = g === currentGrade;
+                const btn = document.createElement('button');
+                btn.onclick = () => selectGrade(g);
+                btn.id = `grade-pill-${g}`;
+                btn.className = isSelected
+                    ? "py-2.5 px-2 rounded-xl font-display font-bold text-xs sm:text-sm bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400 transition transform scale-105"
+                    : "py-2.5 px-2 rounded-xl font-display font-semibold text-xs sm:text-sm bg-slate-900/90 hover:bg-slate-800 text-slate-300 border border-slate-800 transition";
+                btn.innerHTML = `<div class="text-[10px] uppercase tracking-wider opacity-75">Grade</div><div class="text-base sm:text-lg">${g}</div>`;
+                container.appendChild(btn);
+
+                // Populate quiz selector
+                const opt = document.createElement('option');
+                opt.value = g;
+                opt.textContent = `Grade ${g} (${CURRICULUM_DATA[g].level})`;
+                quizSelect.appendChild(opt);
+            }
+            renderCurriculumCards();
+        }
+
+        function selectGrade(gradeNum) {
+            currentGrade = gradeNum;
+            for (let g = 1; g <= 12; g++) {
+                const btn = document.getElementById(`grade-pill-${g}`);
+                if (g === currentGrade) {
+                    btn.className = "py-2.5 px-2 rounded-xl font-display font-bold text-xs sm:text-sm bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400 transition transform scale-105";
+                } else {
+                    btn.className = "py-2.5 px-2 rounded-xl font-display font-semibold text-xs sm:text-sm bg-slate-900/90 hover:bg-slate-800 text-slate-300 border border-slate-800 transition";
+                }
+            }
+            renderCurriculumCards();
+        }
+
+        function renderCurriculumCards() {
+            const data = CURRICULUM_DATA[currentGrade];
+            const searchQuery = document.getElementById('topic-search').value.trim().toLowerCase();
+            const subjectFilter = document.getElementById('subject-filter').value;
+
+            // Update overview banner
+            const banner = document.getElementById('grade-overview-banner');
+            banner.innerHTML = `
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500 text-white">Grade ${currentGrade}</span>
+                        <span class="text-xs font-semibold text-emerald-300 uppercase tracking-wider">${data.level}</span>
+                    </div>
+                    <h3 class="text-lg sm:text-2xl font-display font-bold text-white">${data.tagline}</h3>
+                </div>
+                <div class="flex flex-wrap gap-2 shrink-0">
+                    <button onclick="switchMainTab('quiz')" class="px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs sm:text-sm font-semibold transition">
+                        <i class="fa-solid fa-bolt mr-1.5"></i>Take Grade ${currentGrade} Quiz
+                    </button>
+                    <button onclick="switchMainTab('labs')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold shadow transition">
+                        <i class="fa-solid fa-flask mr-1.5"></i>Launch Simulators
+                    </button>
+                </div>
+            `;
+
+            const grid = document.getElementById('curriculum-grid');
+            grid.innerHTML = '';
+
+            // Helper to build a column
+            const createSubjectColumn = (subjectKey, title, icon, badgeColor, items) => {
+                const filtered = items.filter(item =>
+                    !searchQuery ||
+                    item.title.toLowerCase().includes(searchQuery) ||
+                    item.desc.toLowerCase().includes(searchQuery) ||
+                    item.formula.toLowerCase().includes(searchQuery)
+                );
+
+                const col = document.createElement('div');
+                col.className = "space-y-4";
+                col.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-xl ${badgeColor} flex items-center justify-center">
+                                <i class="fa-solid ${icon}"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-display font-bold text-base sm:text-lg text-white">${title}</h4>
+                                <p class="text-xs text-slate-400">Grade ${currentGrade} Core Curriculum</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-mono text-slate-400">${filtered.length} Modules</span>
+                    </div>
+                `;
+
+                if (filtered.length === 0) {
+                    col.innerHTML += `<div class="glass-card p-6 rounded-2xl text-center text-xs text-slate-400">No topics in Grade ${currentGrade} match "${searchQuery}". Try clearing the search filter.</div>`;
+                    return col;
+                }
+
+                filtered.forEach((mod, idx) => {
+                    const card = document.createElement('div');
+                    card.className = "glass-card p-5 rounded-2xl border border-slate-800 hover:border-indigo-500/50 transition group flex flex-col justify-between gap-4";
+                    card.innerHTML = `
+                        <div class="space-y-2.5">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300">Module ${idx + 1}</span>
+                                <span class="text-xs font-mono text-indigo-300 bg-indigo-950/70 px-2.5 py-1 rounded-lg border border-indigo-500/20">${mod.formula}</span>
+                            </div>
+                            <h5 class="font-display font-bold text-base sm:text-lg text-white group-hover:text-indigo-300 transition">${mod.title}</h5>
+                            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">${mod.desc}</p>
+                            <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800/90 text-xs text-slate-300">
+                                <strong class="text-emerald-400"><i class="fa-regular fa-lightbulb mr-1"></i>Example:</strong> ${mod.example}
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
+                            <button onclick='openLessonModal(${JSON.stringify(mod).replace(/'/g, "&apos;")}, "${subjectKey}")' class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+                                <span>Interactive Deep Dive</span>
+                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </button>
+                            <button onclick="jumpToLab('${mod.lab}')" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 transition">
+                                <i class="fa-solid fa-play mr-1 text-[10px]"></i>Open Lab
+                            </button>
+                        </div>
+                    `;
+                    col.appendChild(card);
+                });
+
+                return col;
+            };
+
+            if (subjectFilter === 'ALL' || subjectFilter === 'MATH') {
+                grid.appendChild(createSubjectColumn('Mathematics', 'Mathematics & Logic', 'fa-square-root-variable', 'bg-indigo-500/20 text-indigo-400', data.math));
+            }
+            if (subjectFilter === 'ALL' || subjectFilter === 'SCIENCE') {
+                grid.appendChild(createSubjectColumn('Science', 'Natural & Physical Sciences', 'fa-atom', 'bg-emerald-500/20 text-emerald-400', data.science));
+            }
+        }
+
+        // --- LESSON MODAL FUNCTIONS ---
+        function openLessonModal(mod, subject) {
+            activeLessonLab = mod.lab;
+            document.getElementById('modal-badge').textContent = `Grade ${currentGrade} • ${subject}`;
+            document.getElementById('modal-title').textContent = mod.title;
+            document.getElementById('modal-body').innerHTML = `
+                <div class="p-4 rounded-xl bg-indigo-950/50 border border-indigo-500/30 text-center">
+                    <div class="text-xs text-indigo-300 uppercase font-semibold mb-1">Key Principle / Formula</div>
+                    <div class="font-mono text-base sm:text-lg font-bold text-white">${mod.formula}</div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-white mb-1">Concept Overview</h4>
+                    <p>${mod.desc}</p>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900 border border-slate-800">
+                    <h4 class="font-bold text-emerald-400 mb-1"><i class="fa-solid fa-check-double mr-1.5"></i>Worked Real-World Application</h4>
+                    <p>${mod.example}</p>
+                </div>
+            `;
+            document.getElementById('lesson-modal').classList.remove('hidden');
+        }
+
+        function closeLessonModal() {
+            document.getElementById('lesson-modal').classList.add('hidden');
+        }
+
+        function completeLessonXP() {
+            addXP(25, `Mastered Grade ${currentGrade} Module!`);
+            closeLessonModal();
+        }
+
+        function openSuggestedLab() {
+            closeLessonModal();
+            jumpToLab(activeLessonLab);
+        }
+
+        function jumpToLab(labKey) {
+            switchMainTab('labs');
+            switchLab(labKey);
+        }
+
+        // --- VIRTUAL LABS SWITCHER ---
+        function switchLab(labKey) {
+            ['graph', 'pendulum', 'fraction', 'atom'].forEach(k => {
+                const panel = document.getElementById(`lab-panel-${k}`);
+                const btn = document.getElementById(`lab-btn-${k}`);
+                if (k === labKey) {
+                    panel.classList.remove('hidden');
+                    panel.classList.add('grid');
+                    btn.className = "lab-tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 text-white shadow";
+                } else {
+                    panel.classList.add('hidden');
+                    panel.classList.remove('grid');
+                    btn.className = "lab-tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700";
+                }
+            });
+
+            if (labKey === 'graph') setTimeout(resizeAndDrawGraph, 40);
+            if (labKey === 'pendulum') setTimeout(resizePendulumCanvas, 40);
+            if (labKey === 'fraction') updateFractionLab();
+            if (labKey === 'atom') updateAtomLab();
+        }
+
+        // ==========================================
+        // LAB 1 ENGINE: PARABOLA & TRIG GRAPHER
+        // ==========================================
+        function resetGraphLab() {
+            document.getElementById('slider-a').value = 1;
+            document.getElementById('slider-b').value = 0;
+            document.getElementById('slider-c').value = -2;
+            updateGraphLab();
+        }
+
+        function updateGraphLab() {
+            const a = parseFloat(document.getElementById('slider-a').value);
+            const b = parseFloat(document.getElementById('slider-b').value);
+            const c = parseFloat(document.getElementById('slider-c').value);
+
+            document.getElementById('val-a').textContent = a.toFixed(1);
+            document.getElementById('val-b').textContent = b.toFixed(1);
+            document.getElementById('val-c').textContent = c.toFixed(1);
+
+            const signB = b >= 0 ? `+ ${b.toFixed(1)}x` : `- ${Math.abs(b).toFixed(1)}x`;
+            const signC = c >= 0 ? `+ ${c.toFixed(1)}` : `- ${Math.abs(c).toFixed(1)}`;
+            document.getElementById('graph-equation-display').textContent = `y = ${a.toFixed(1)}x² ${signB} ${signC}`;
+
+            // Vertex & Roots calculation
+            if (Math.abs(a) > 0.001) {
+                const h = -b / (2 * a);
+                const k = a * h * h + b * h + c;
+                const disc = b * b - 4 * a * c;
+                document.getElementById('graph-vertex').textContent = `(${h.toFixed(2)}, ${k.toFixed(2)})`;
+                document.getElementById('graph-disc').textContent = disc.toFixed(2);
+                if (disc > 0) {
+                    const r1 = (-b + Math.sqrt(disc)) / (2 * a);
+                    const r2 = (-b - Math.sqrt(disc)) / (2 * a);
+                    document.getElementById('graph-roots').textContent = `x = ${r1.toFixed(2)}, ${r2.toFixed(2)}`;
+                } else if (Math.abs(disc) < 0.001) {
+                    document.getElementById('graph-roots').textContent = `x = ${h.toFixed(2)} (Double)`;
+                } else {
+                    document.getElementById('graph-roots').textContent = `Complex (No X-Intercept)`;
+                }
+            } else {
+                document.getElementById('graph-vertex').textContent = `Linear Line (a = 0)`;
+                document.getElementById('graph-disc').textContent = `N/A`;
+                document.getElementById('graph-roots').textContent = b !== 0 ? `x = ${(-c / b).toFixed(2)}` : `None`;
+            }
+
+            drawGraphCanvas(a, b, c);
+        }
+
+        function resizeAndDrawGraph() {
+            const canvas = document.getElementById('graphCanvas');
+            if (!canvas || !canvas.parentElement) return;
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight || 360;
+            updateGraphLab();
+        }
+
+        function drawGraphCanvas(a, b, c) {
+            const canvas = document.getElementById('graphCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            const scale = Math.min(w, h) / 16; // 16 units across
+            const cx = w / 2;
+            const cy = h / 2;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Grid lines
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            for (let x = -15; x <= 15; x++) {
+                const px = cx + x * scale;
+                ctx.beginPath();
+                ctx.moveTo(px, 0);
+                ctx.lineTo(px, h);
+                ctx.stroke();
+            }
+            for (let y = -15; y <= 15; y++) {
+                const py = cy - y * scale;
+                ctx.beginPath();
+                ctx.moveTo(0, py);
+                ctx.lineTo(w, py);
+                ctx.stroke();
+            }
+
+            // X and Y Axes
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, cy);
+            ctx.lineTo(w, cy);
+            ctx.moveTo(cx, 0);
+            ctx.lineTo(cx, h);
+            ctx.stroke();
+
+            // Plot Quadratic y = ax^2 + bx + c
+            ctx.strokeStyle = '#818cf8';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let px = 0; px <= w; px += 2) {
+                const x = (px - cx) / scale;
+                const y = a * x * x + b * x + c;
+                const py = cy - y * scale;
+                if (px === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            // Optional Sine wave overlay
+            if (document.getElementById('toggle-sine').checked) {
+                ctx.strokeStyle = '#34d399';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                const freq = Math.abs(b) < 0.2 ? 1 : b;
+                for (let px = 0; px <= w; px += 2) {
+                    const x = (px - cx) / scale;
+                    const y = a * Math.sin(freq * x) + c;
+                    const py = cy - y * scale;
+                    if (px === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+            }
+
+            // Draw Vertex Point
+            if (Math.abs(a) > 0.001) {
+                const vx = -b / (2 * a);
+                const vy = a * vx * vx + b * vx + c;
+                const pvx = cx + vx * scale;
+                const pvy = cy - vy * scale;
+                ctx.fillStyle = '#fbbf24';
+                ctx.beginPath();
+                ctx.arc(pvx, pvy, 6, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // ==========================================
+        // LAB 2 ENGINE: GRAVITY PENDULUM SIMULATOR
+        // ==========================================
+        let pendState = {
+            angle: Math.PI / 3,
+            angleVel: 0,
+            angleAcc: 0,
+            length: 1.5,
+            gravity: 9.81,
+            damping: 0.998
+        };
+
+        function updatePendulumParams() {
+            pendState.gravity = parseFloat(document.getElementById('pendulum-planet').value);
+            pendState.length = parseFloat(document.getElementById('slider-pend-len').value);
+            pendState.damping = parseFloat(document.getElementById('slider-pend-damp').value);
+
+            document.getElementById('val-pend-len').textContent = `${pendState.length.toFixed(1)} m`;
+            document.getElementById('val-pend-damp').textContent = pendState.damping === 1 ? "Zero (Vacuum)" : (pendState.damping > 0.995 ? "Low" : "High");
+
+            const period = 2 * Math.PI * Math.sqrt(pendState.length / pendState.gravity);
+            document.getElementById('pend-period').textContent = `${period.toFixed(2)} s`;
+        }
+
+        function resetPendulum() {
+            pendState.angle = Math.PI / 3;
+            pendState.angleVel = 0;
+            updatePendulumParams();
+        }
+
+        function resizePendulumCanvas() {
+            const canvas = document.getElementById('pendulumCanvas');
+            if (!canvas || !canvas.parentElement) return;
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight || 360;
+        }
+
+        function stepPendulum() {
+            const canvas = document.getElementById('pendulumCanvas');
+            if (canvas && !document.getElementById('lab-panel-pendulum').classList.contains('hidden')) {
+                const ctx = canvas.getContext('2d');
+                const w = canvas.width;
+                const h = canvas.height;
+                const originX = w / 2;
+                const originY = 50;
+
+                // Physics step (dt ~ 1/60s)
+                const dt = 0.04;
+                pendState.angleAcc = (-pendState.gravity / pendState.length) * Math.sin(pendState.angle);
+                pendState.angleVel += pendState.angleAcc * dt;
+                pendState.angleVel *= pendState.damping;
+                pendState.angle += pendState.angleVel * dt;
+
+                document.getElementById('pend-vel').textContent = `${Math.abs(pendState.angleVel).toFixed(2)} rad/s`;
+
+                const pixelLen = pendState.length * Math.min(w, h) * 0.32;
+                const bobX = originX + pixelLen * Math.sin(pendState.angle);
+                const bobY = originY + pixelLen * Math.cos(pendState.angle);
+
+                ctx.clearRect(0, 0, w, h);
+
+                // Protractor arc guide
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(originX, originY, pixelLen, 0, Math.PI);
+                ctx.stroke();
+
+                // Ceiling mount
+                ctx.strokeStyle = '#64748b';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(originX - 50, originY);
+                ctx.lineTo(originX + 50, originY);
+                ctx.stroke();
+
+                // Pendulum Rod
+                ctx.strokeStyle = '#94a3b8';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(originX, originY);
+                ctx.lineTo(bobX, bobY);
+                ctx.stroke();
+
+                // Glowing Bob
+                const grad = ctx.createRadialGradient(bobX - 5, bobY - 5, 3, bobX, bobY, 22);
+                grad.addColorStop(0, '#6ee7b7');
+                grad.addColorStop(1, '#059669');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(bobX, bobY, 22, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            pendulumAnimId = requestAnimationFrame(stepPendulum);
+        }
+
+        // ==========================================
+        // LAB 3 ENGINE: FRACTION PIZZA VISUALIZER
+        // ==========================================
+        function updateFractionLab() {
+            const numSlider = document.getElementById('slider-num');
+            const denSlider = document.getElementById('slider-den');
+            const den = parseInt(denSlider.value);
+            numSlider.max = den;
+            if (parseInt(numSlider.value) > den) numSlider.value = den;
+            const num = parseInt(numSlider.value);
+
+            document.getElementById('val-num').textContent = num;
+            document.getElementById('val-den').textContent = den;
+
+            const dec = num / den;
+            const pct = dec * 100;
+            document.getElementById('frac-display').textContent = `${num} / ${den}`;
+            document.getElementById('dec-display').textContent = dec.toFixed(3);
+            document.getElementById('pct-display').textContent = `${pct.toFixed(1)}%`;
+
+            // Build SVG Pizza Chart
+            const size = 240;
+            const r = 100;
+            const cx = 120;
+            const cy = 120;
+            let svgContent = `<svg viewBox="0 0 ${size} ${size}" class="w-full h-full drop-shadow-xl">`;
+
+            if (den === 1) {
+                const fill = num === 1 ? '#f59e0b' : '#1e293b';
+                svgContent += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="#cbd5e1" stroke-width="3"/>`;
+            } else {
+                for (let i = 0; i < den; i++) {
+                    const startAngle = (i * 2 * Math.PI) / den - Math.PI / 2;
+                    const endAngle = ((i + 1) * 2 * Math.PI) / den - Math.PI / 2;
+                    const x1 = cx + r * Math.cos(startAngle);
+                    const y1 = cy + r * Math.sin(startAngle);
+                    const x2 = cx + r * Math.cos(endAngle);
+                    const y2 = cy + r * Math.sin(endAngle);
+                    const largeArc = (endAngle - startAngle) > Math.PI ? 1 : 0;
+                    const fill = i < num ? '#f59e0b' : '#1e293b';
+                    svgContent += `<path d="M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z" fill="${fill}" stroke="#0f172a" stroke-width="3"/>`;
+                }
+            }
+            svgContent += `</svg>`;
+            document.getElementById('fraction-svg-wrapper').innerHTML = svgContent;
+            document.getElementById('fraction-verbal').textContent = `${num} out of ${den} equal slices shaded (${pct.toFixed(1)}% of the whole).`;
+        }
+
+        // ==========================================
+        // LAB 4 ENGINE: BOHR ATOM BUILDER
+        // ==========================================
+        function updateAtomLab() {
+            const p = parseInt(document.getElementById('slider-protons').value);
+            const n = parseInt(document.getElementById('slider-neutrons').value);
+            const e = parseInt(document.getElementById('slider-electrons').value);
+
+            document.getElementById('val-protons').textContent = p;
+            document.getElementById('val-neutrons').textContent = n;
+            document.getElementById('val-electrons').textContent = e;
+
+            const el = ELEMENTS_DB[p];
+            const mass = p + n;
+            const charge = p - e;
+            const chargeStr = charge === 0 ? "Neutral Atom (0)" : (charge > 0 ? `Cation (+${charge})` : `Anion (${charge})`);
+
+            document.getElementById('element-card').innerHTML = `
+                <div class="flex items-center gap-3.5">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-600 to-cyan-600 flex flex-col items-center justify-center text-white font-display border border-white/20">
+                        <span class="text-[10px] leading-none">${p}</span>
+                        <span class="text-xl font-bold leading-tight">${el.sym}</span>
+                    </div>
+                    <div>
+                        <div class="font-display font-bold text-white text-base">${el.name} (${el.sym}-${mass})</div>
+                        <div class="text-xs text-cyan-300">${el.group}</div>
+                        <div class="text-[11px] text-slate-400">Mass Number: ${mass} amu • ${chargeStr}</div>
+                    </div>
+                </div>
+            `;
+
+            // Render Bohr Shells SVG (Inner shell max 2, outer shell up to 8)
+            const innerE = Math.min(2, e);
+            const outerE = Math.max(0, e - 2);
+            let svg = `<svg viewBox="0 0 260 260" class="w-full h-full">`;
+            // Orbits
+            svg += `<circle cx="130" cy="130" r="60" fill="none" stroke="#334155" stroke-width="2" stroke-dasharray="4 4"/>`;
+            if (outerE > 0) {
+                svg += `<circle cx="130" cy="130" r="105" fill="none" stroke="#334155" stroke-width="2" stroke-dasharray="4 4"/>`;
+            }
+            // Nucleus cluster
+            svg += `<circle cx="130" cy="130" r="24" fill="#f43f5e" opacity="0.25"/>`;
+            svg += `<circle cx="130" cy="130" r="16" fill="#f43f5e"/>`;
+            svg += `<text x="130" y="134" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="bold">${p}p ${n}n</text>`;
+
+            // Inner shell electrons
+            for (let i = 0; i < innerE; i++) {
+                const ang = (i * 2 * Math.PI) / innerE - Math.PI / 2;
+                const ex = 130 + 60 * Math.cos(ang);
+                const ey = 130 + 60 * Math.sin(ang);
+                svg += `<circle cx="${ex}" cy="${ey}" r="6" fill="#22d3ee" stroke="#0f172a" stroke-width="2"/>`;
+            }
+            // Outer shell electrons
+            for (let i = 0; i < outerE; i++) {
+                const ang = (i * 2 * Math.PI) / outerE - Math.PI / 2;
+                const ex = 130 + 105 * Math.cos(ang);
+                const ey = 130 + 105 * Math.sin(ang);
+                svg += `<circle cx="${ex}" cy="${ey}" r="6" fill="#38bdf8" stroke="#0f172a" stroke-width="2"/>`;
+            }
+            svg += `</svg>`;
+            document.getElementById('atom-svg-wrapper').innerHTML = svg;
+        }
+
+        // ==========================================
+        // GRADE-SPECIFIC INTERACTIVE QUIZ ENGINE
+        // ==========================================
+        let quizState = { grade: 8, answers: {} };
+
+        function loadQuizForGrade(gradeNum) {
+            const g = parseInt(gradeNum);
+            quizState = { grade: g, answers: {} };
+            const questions = CURRICULUM_DATA[g].quiz;
+            const container = document.getElementById('quiz-container');
+
+            let html = `<div class="space-y-4">`;
+            questions.forEach((qObj, qIdx) => {
+                html += `
+                    <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3">
+                        <div class="text-xs font-bold text-indigo-400 uppercase">Question ${qIdx + 1} of ${questions.length}</div>
+                        <div class="text-sm sm:text-base font-semibold text-white">${qObj.q}</div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                            ${qObj.options.map((opt, oIdx) => `
+                                <button onclick="selectQuizOption(${qIdx}, ${oIdx})" id="q-${qIdx}-opt-${oIdx}" class="text-left px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-950 hover:border-indigo-500 text-xs sm:text-sm text-slate-200 transition">
+                                    <span class="font-mono text-indigo-400 mr-2">${String.fromCharCode(65 + oIdx)}.</span>${opt}
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div id="q-feedback-${qIdx}" class="hidden text-xs font-semibold pt-1"></div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function selectQuizOption(qIdx, oIdx) {
+            const qObj = CURRICULUM_DATA[quizState.grade].quiz[qIdx];
+            const fb = document.getElementById(`q-feedback-${qIdx}`);
+            fb.classList.remove('hidden');
+
+            qObj.options.forEach((_, idx) => {
+                const btn = document.getElementById(`q-${qIdx}-opt-${idx}`);
+                btn.disabled = true;
+                if (idx === qObj.ans) {
+                    btn.className = "text-left px-4 py-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-xs sm:text-sm text-emerald-200 font-semibold";
+                } else if (idx === oIdx) {
+                    btn.className = "text-left px-4 py-2.5 rounded-xl border border-rose-500 bg-rose-500/20 text-xs sm:text-sm text-rose-200";
+                }
+            });
+
+            if (oIdx === qObj.ans) {
+                fb.className = "text-xs font-semibold text-emerald-400 pt-1";
+                fb.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i>Correct! Great STEM reasoning.`;
+                addXP(15, `Correct Grade ${quizState.grade} Quiz Answer!`);
+            } else {
+                fb.className = "text-xs font-semibold text-rose-400 pt-1";
+                fb.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i>Not quite! The correct answer is highlighted in green.`;
+            }
+        }
+
+        // ==========================================
+        // RENDER.COM DEPLOYMENT MODAL & CLIPBOARD
+        // ==========================================
+        function openRenderModal() {
+            document.getElementById('render-modal').classList.remove('hidden');
+        }
+
+        function closeRenderModal() {
+            document.getElementById('render-modal').classList.add('hidden');
+        }
+
+        function copyCodeBlock(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast("Configuration copied to clipboard!", "fa-clipboard-check");
+        }
+
+        // --- INITIALIZE PORTAL ON WINDOW LOAD ---
+        window.onload = function () {
+            initGradeSelector();
+            updateFractionLab();
+            updateAtomLab();
+            updatePendulumParams();
+            stepPendulum();
+            window.addEventListener('resize', () => {
+                resizeAndDrawGraph();
+                resizePendulumCanvas();
+            });
+        };
+    </script>
+</body>
+</html>

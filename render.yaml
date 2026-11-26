@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: stemverse-k12-portal
+    runtime: static
+    buildCommand: echo "Static K-12 Portal Ready"
+    staticPublishPath: .
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

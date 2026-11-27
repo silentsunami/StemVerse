@@ -55,6 +55,40 @@
         canvas {
             touch-action: none;
         }
+
+        /* Quiz Arena Animations */
+        @keyframes quizPop {
+            from { opacity: 0; transform: translateY(8px) scale(0.98); }
+            to { opacity: 1; transform: none; }
+        }
+        .quiz-pop { animation: quizPop 0.35s ease-out; }
+
+        @keyframes quizShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .quiz-shake { animation: quizShake 0.4s ease-in-out; }
+
+        @keyframes quizCorrect {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+        .quiz-correct { animation: quizCorrect 0.4s ease-out; }
+
+        .confetti-piece {
+            position: fixed;
+            top: -14px;
+            width: 8px;
+            height: 14px;
+            border-radius: 2px;
+            z-index: 60;
+            pointer-events: none;
+            animation: confettiFall linear forwards;
+        }
+        @keyframes confettiFall {
+            to { transform: translate(var(--drift, 0px), 105vh) rotate(720deg); opacity: 0.3; }
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-indigo-500 selection:text-white min-h-screen flex flex-col">
@@ -645,7 +679,14 @@ app.listen(PORT, () => console.log(`StemVerse live on port ${PORT}`));</pre>
                 quiz: [
                     { q: "What is 10 + 7?", options: ["15", "17", "71", "18"], ans: 1 },
                     { q: "Which part of a plant absorbs water from the soil?", options: ["Petals", "Roots", "Seeds", "Bark"], ans: 1 },
-                    { q: "How many tens are in the number 42?", options: ["2", "4", "6", "40"], ans: 1 }
+                    { q: "How many tens are in the number 42?", options: ["2", "4", "6", "40"], ans: 1 },
+                    { q: "Which shape has exactly 3 sides?", options: ["Square", "Circle", "Triangle", "Rectangle"], ans: 2 },
+                    { q: "What is 15 - 6?", options: ["8", "9", "11", "7"], ans: 1 },
+                    { q: "Which number comes right after 59?", options: ["50", "58", "60", "69"], ans: 2 },
+                    { q: "Skip-count by 5s: 5, 10, 15, ___", options: ["16", "20", "25", "30"], ans: 1 },
+                    { q: "What do plants need from the Sun to grow?", options: ["Sound", "Light", "Wind", "Snow"], ans: 1 },
+                    { q: "Which season usually has the coldest weather?", options: ["Summer", "Spring", "Winter", "Autumn"], ans: 2 },
+                    { q: "At what time of day is your shadow the shortest?", options: ["Early morning", "Noon", "Late afternoon", "Sunset"], ans: 1 }
                 ]
             },
             2: {
@@ -662,7 +703,14 @@ app.listen(PORT, () => console.log(`StemVerse live on port ${PORT}`));</pre>
                 quiz: [
                     { q: "If a circle is cut into 4 equal pieces, what is 1 piece called?", options: ["One-half", "One-third", "One-fourth", "One-whole"], ans: 2 },
                     { q: "Water freezing into ice is a change from:", options: ["Liquid to Solid", "Gas to Liquid", "Solid to Gas", "Solid to Liquid"], ans: 0 },
-                    { q: "What is 340 + 200?", options: ["360", "540", "440", "640"], ans: 1 }
+                    { q: "What is 340 + 200?", options: ["360", "540", "440", "640"], ans: 1 },
+                    { q: "How many cents are in 3 quarters?", options: ["50¢", "60¢", "75¢", "100¢"], ans: 2 },
+                    { q: "What is 82 - 47?", options: ["35", "45", "39", "25"], ans: 0 },
+                    { q: "In the number 627, what is the value of the digit 2?", options: ["2", "20", "200", "27"], ans: 1 },
+                    { q: "How many sides does a hexagon have?", options: ["5", "6", "7", "8"], ans: 1 },
+                    { q: "Heating ice until it melts turns it into a:", options: ["Gas", "Liquid", "Solid", "Rock"], ans: 1 },
+                    { q: "In a butterfly's life cycle, what comes after the caterpillar (larva) stage?", options: ["Egg", "Adult", "Pupa (chrysalis)", "Tadpole"], ans: 2 },
+                    { q: "Which animal helps flowers make seeds by carrying pollen?", options: ["Bee", "Worm", "Fish", "Snail"], ans: 0 }
                 ]
             },
             3: {
@@ -679,7 +727,14 @@ app.listen(PORT, () => console.log(`StemVerse live on port ${PORT}`));</pre>
                 quiz: [
                     { q: "Which fraction is equivalent to 1/2?", options: ["1/4", "2/4", "3/4", "2/3"], ans: 1 },
                     { q: "What happens when two North poles of magnets are brought close?", options: ["They attract", "They repel", "They melt", "Nothing happens"], ans: 1 },
-                    { q: "What is 7 × 8?", options: ["54", "56", "64", "48"], ans: 1 }
+                    { q: "What is 7 × 8?", options: ["54", "56", "64", "48"], ans: 1 },
+                    { q: "What is 36 ÷ 4?", options: ["8", "9", "7", "12"], ans: 1 },
+                    { q: "Which fraction is larger?", options: ["1/3", "1/5", "They are equal", "Cannot tell"], ans: 0 },
+                    { q: "A garden has 5 rows of 9 flowers. How many flowers are there in total?", options: ["14", "40", "45", "54"], ans: 2 },
+                    { q: "What is the perimeter of a square with 6 cm sides?", options: ["12 cm", "24 cm", "36 cm", "18 cm"], ans: 1 },
+                    { q: "Which force slows down a ball rolling across the grass?", options: ["Magnetism", "Friction", "Electricity", "Light"], ans: 1 },
+                    { q: "Which instrument measures wind speed?", options: ["Thermometer", "Barometer", "Anemometer", "Rain gauge"], ans: 2 },
+                    { q: "Which object would a magnet attract?", options: ["Wooden spoon", "Plastic cup", "Iron nail", "Glass marble"], ans: 2 }
                 ]
             },
             4: {
@@ -696,7 +751,14 @@ app.listen(PORT, () => console.log(`StemVerse live on port ${PORT}`));</pre>
                 quiz: [
                     { q: "How is the fraction 7/10 written as a decimal?", options: ["0.07", "0.7", "7.0", "0.77"], ans: 1 },
                     { q: "Which type of rock forms from cooled lava or magma?", options: ["Sedimentary", "Igneous", "Metamorphic", "Fossil"], ans: 1 },
-                    { q: "What is the area of a rectangle with length 12 cm and width 5 cm?", options: ["17 cm²", "34 cm²", "60 cm²", "55 cm²"], ans: 2 }
+                    { q: "What is the area of a rectangle with length 12 cm and width 5 cm?", options: ["17 cm²", "34 cm²", "60 cm²", "55 cm²"], ans: 2 },
+                    { q: "What is 24 × 15?", options: ["320", "360", "390", "340"], ans: 1 },
+                    { q: "Which decimal is the greatest?", options: ["0.65", "0.7", "0.59", "0.067"], ans: 1 },
+                    { q: "What is 125 ÷ 4?", options: ["31 R1", "30 R5", "31", "32 R3"], ans: 0 },
+                    { q: "How many degrees are in a right angle?", options: ["45°", "90°", "180°", "360°"], ans: 1 },
+                    { q: "A rollercoaster has the MOST potential energy when it is:", options: ["At the bottom of a hill", "At the top of the highest hill", "Moving at top speed", "Stopped at the station"], ans: 1 },
+                    { q: "Sound travels from place to place as:", options: ["Vibrations (waves)", "Tiny magnets", "Light rays", "Electric sparks"], ans: 0 },
+                    { q: "Fossils are most commonly found in which type of rock?", options: ["Igneous", "Metamorphic", "Sedimentary", "Volcanic glass"], ans: 2 }
                 ]
             },
             5: {
@@ -713,7 +775,14 @@ app.listen(PORT, () => console.log(`StemVerse live on port ${PORT}`));</pre>
                 quiz: [
                     { q: "What is the volume of a cube with side length 3 cm?", options: ["9 cm³", "18 cm³", "27 cm³", "12 cm³"], ans: 2 },
                     { q: "In a food web, green plants are classified as:", options: ["Decomposers", "Producers", "Carnivores", "Primary Consumers"], ans: 1 },
-                    { q: "What is 1/2 + 1/3?", options: ["2/5", "5/6", "1/6", "3/5"], ans: 1 }
+                    { q: "What is 1/2 + 1/3?", options: ["2/5", "5/6", "1/6", "3/5"], ans: 1 },
+                    { q: "What is 3/4 - 1/6?", options: ["2/2", "7/12", "1/2", "5/12"], ans: 1 },
+                    { q: "What is 2/3 × 3/5?", options: ["2/5", "5/8", "6/8", "1/3"], ans: 0 },
+                    { q: "What is 4.5 × 10?", options: ["0.45", "45", "450", "4.05"], ans: 1 },
+                    { q: "Which ordered pair is 3 units right and 5 units up from the origin?", options: ["(5, 3)", "(3, 5)", "(-3, 5)", "(3, -5)"], ans: 1 },
+                    { q: "Baking soda and vinegar fizzing and making gas is an example of a:", options: ["Physical change", "Chemical change", "Change of state", "Simple mixture"], ans: 1 },
+                    { q: "Which planet is closest to the Sun?", options: ["Venus", "Earth", "Mercury", "Mars"], ans: 2 },
+                    { q: "Plants make food by photosynthesis using sunlight, water, and:", options: ["Oxygen", "Carbon dioxide", "Nitrogen", "Salt"], ans: 1 }
                 ]
             },
             6: {
@@ -730,7 +799,14 @@ app.listen(PORT, () => console.log(`StemVerse live on port ${PORT}`));</pre>
                 quiz: [
                     { q: "Solve for x:  4x + 6 = 26", options: ["x = 4", "x = 5", "x = 6", "x = 8"], ans: 1 },
                     { q: "Which organelle is present in plant cells for photosynthesis but NOT in animal cells?", options: ["Nucleus", "Ribosome", "Chloroplast", "Cell Membrane"], ans: 2 },
-                    { q: "What is 25% of 80?", options: ["15", "20", "25", "40"], ans: 1 }
+                    { q: "What is 25% of 80?", options: ["15", "20", "25", "40"], ans: 1 },
+                    { q: "If 4 notebooks cost $12, what is the unit price per notebook?", options: ["$2", "$3", "$4", "$48"], ans: 1 },
+                    { q: "Evaluate 2x² - 3 when x = 4.", options: ["13", "29", "61", "32"], ans: 1 },
+                    { q: "Simplify the ratio 18 : 24.", options: ["2 : 3", "3 : 4", "9 : 16", "6 : 9"], ans: 1 },
+                    { q: "What is -7 + 12?", options: ["-19", "-5", "5", "19"], ans: 2 },
+                    { q: "Which organelle is known as the powerhouse of the cell?", options: ["Nucleus", "Mitochondria", "Ribosome", "Vacuole"], ans: 1 },
+                    { q: "Heat moving through direct contact, like a hot pan handle, is called:", options: ["Radiation", "Convection", "Conduction", "Insulation"], ans: 2 },
+                    { q: "Earthquakes and volcanoes are most common at:", options: ["The centers of continents", "Tectonic plate boundaries", "Lakes and rivers", "Desert sand dunes"], ans: 1 }
                 ]
             },
             7: {
@@ -747,7 +823,14 @@ app.listen(PORT, () => console.log(`StemVerse live on port ${PORT}`));</pre>
                 quiz: [
                     { q: "What is the area of a circle with radius r = 4? (Use π ≈ 3.14)", options: ["25.12", "50.24", "12.56", "16.00"], ans: 1 },
                     { q: "In a Punnett square cross between Bb and Bb, what percentage of offspring are homozygous recessive (bb)?", options: ["0%", "25%", "50%", "75%"], ans: 1 },
-                    { q: "Solve: -3(x - 4) = 15", options: ["x = -1", "x = 1", "x = -9", "x = 9"], ans: 0 }
+                    { q: "Solve: -3(x - 4) = 15", options: ["x = -1", "x = 1", "x = -9", "x = 9"], ans: 0 },
+                    { q: "A $50 jacket is 20% off. What is the sale price?", options: ["$30", "$40", "$45", "$10"], ans: 1 },
+                    { q: "What is the circumference of a circle with radius 5? (Use π ≈ 3.14)", options: ["15.7", "31.4", "78.5", "25"], ans: 1 },
+                    { q: "If y = kx and y = 21 when x = 3, what is the constant k?", options: ["3", "7", "18", "63"], ans: 1 },
+                    { q: "A fair six-sided die is rolled. What is the probability of rolling an even number?", options: ["1/6", "1/3", "1/2", "2/3"], ans: 2 },
+                    { q: "Crossing Aa × Aa, what percentage of offspring show the dominant trait?", options: ["25%", "50%", "75%", "100%"], ans: 2 },
+                    { q: "An endothermic reaction:", options: ["Releases heat", "Absorbs heat", "Only produces light", "Has no energy change"], ans: 1 },
+                    { q: "What are the products of photosynthesis?", options: ["CO₂ and water", "Glucose and oxygen", "Oxygen and nitrogen", "Glucose and CO₂"], ans: 1 }
                 ]
             },
             8: {
@@ -764,7 +847,14 @@ app.listen(PORT, () => console.log(`StemVerse live on port ${PORT}`));</pre>
                 quiz: [
                     { q: "A right triangle has legs of 6 cm and 8 cm. What is the hypotenuse?", options: ["10 cm", "12 cm", "14 cm", "100 cm"], ans: 0 },
                     { q: "According to Newton's Second Law (F = ma), what force accelerates a 5 kg mass at 4 m/s²?", options: ["1.25 N", "9 N", "20 N", "25 N"], ans: 2 },
-                    { q: "How many valence electrons does Oxygen (Atomic #8) have?", options: ["2", "4", "6", "8"], ans: 2 }
+                    { q: "How many valence electrons does Oxygen (Atomic #8) have?", options: ["2", "4", "6", "8"], ans: 2 },
+                    { q: "What is the slope of the line through (1, 2) and (3, 8)?", options: ["2", "3", "6", "1/3"], ans: 1 },
+                    { q: "Where do the lines y = 2x + 1 and y = -x + 7 intersect?", options: ["(1, 3)", "(2, 5)", "(3, 7)", "(2, 3)"], ans: 1 },
+                    { q: "How is 45,000 written in scientific notation?", options: ["4.5 × 10³", "45 × 10³", "4.5 × 10⁴", "0.45 × 10⁵"], ans: 2 },
+                    { q: "What is √144?", options: ["11", "12", "14", "72"], ans: 1 },
+                    { q: "Newton's Third Law says that for every action there is:", options: ["A greater reaction", "An equal and opposite reaction", "No reaction", "A delayed reaction"], ans: 1 },
+                    { q: "What is the momentum of a 3 kg ball moving at 4 m/s? (p = mv)", options: ["7 kg·m/s", "12 kg·m/s", "0.75 kg·m/s", "24 kg·m/s"], ans: 1 },
+                    { q: "Elements in the same group (column) of the periodic table have the same number of:", options: ["Neutrons", "Valence electrons", "Protons", "Electron shells"], ans: 1 }
                 ]
             },
             9: {
@@ -781,7 +871,14 @@ app.listen(PORT, () => console.log(`StemVerse live on port ${PORT}`));</pre>
                 quiz: [
                     { q: "What are the x-intercepts (roots) of y = x² - 9?", options: ["x = 3 only", "x = 3 and x = -3", "x = 9 and x = -9", "No real roots"], ans: 1 },
                     { q: "In DNA, Cytosine (C) always pairs with which nitrogenous base?", options: ["Adenine (A)", "Thymine (T)", "Uracil (U)", "Guanine (G)"], ans: 3 },
-                    { q: "If a 2 kg ball moves at 3 m/s, what is its Kinetic Energy (KE = ½mv²)?", options: ["3 J", "6 J", "9 J", "18 J"], ans: 2 }
+                    { q: "If a 2 kg ball moves at 3 m/s, what is its Kinetic Energy (KE = ½mv²)?", options: ["3 J", "6 J", "9 J", "18 J"], ans: 2 },
+                    { q: "Factor: x² - 5x + 6", options: ["(x - 1)(x - 6)", "(x - 2)(x - 3)", "(x + 2)(x + 3)", "(x - 2)(x + 3)"], ans: 1 },
+                    { q: "What is the vertex of y = (x - 2)² + 3?", options: ["(-2, 3)", "(2, -3)", "(2, 3)", "(3, 2)"], ans: 2 },
+                    { q: "What is the discriminant (b² - 4ac) of x² + 4x + 5?", options: ["-4", "4", "36", "-36"], ans: 0 },
+                    { q: "$1,000 grows at 10% interest per year. What is it worth after 2 years?", options: ["$1,200", "$1,210", "$1,100", "$1,331"], ans: 1 },
+                    { q: "If a car's velocity doubles, its kinetic energy:", options: ["Doubles", "Halves", "Quadruples", "Stays the same"], ans: 2 },
+                    { q: "What is the potential energy of a 2 kg object 5 m above the ground? (PE = mgh, g = 9.8 m/s²)", options: ["10 J", "49 J", "98 J", "196 J"], ans: 2 },
+                    { q: "During transcription, DNA is copied into:", options: ["Protein", "mRNA", "Glucose", "Lipids"], ans: 1 }
                 ]
             },
             10: {
@@ -798,7 +895,14 @@ app.listen(PORT, () => console.log(`StemVerse live on port ${PORT}`));</pre>
                 quiz: [
                     { q: "In a right triangle, if Opposite = 3 and Hypotenuse = 5, what is sin(θ)?", options: ["3/4", "4/5", "3/5", "5/3"], ans: 2 },
                     { q: "What type of bond forms when two nonmetal atoms SHARE electrons?", options: ["Ionic bond", "Covalent bond", "Metallic bond", "Nuclear bond"], ans: 1 },
-                    { q: "What is the radius of the circle (x - 1)² + (y + 4)² = 49?", options: ["7", "14", "49", "24.5"], ans: 0 }
+                    { q: "What is the radius of the circle (x - 1)² + (y + 4)² = 49?", options: ["7", "14", "49", "24.5"], ans: 0 },
+                    { q: "What is sin(30°)?", options: ["0.5", "√3/2", "1", "√2/2"], ans: 0 },
+                    { q: "In a right triangle, if Adjacent = 4 and Hypotenuse = 5, what is cos(θ)?", options: ["3/5", "4/5", "3/4", "5/4"], ans: 1 },
+                    { q: "What is the center of the circle (x - 2)² + (y + 3)² = 25?", options: ["(-2, 3)", "(2, -3)", "(2, 3)", "(-2, -3)"], ans: 1 },
+                    { q: "Which of these is NOT a valid triangle congruence shortcut?", options: ["SSS", "SAS", "ASA", "AAA"], ans: 3 },
+                    { q: "What is the molar mass of water (H₂O)?", options: ["16 g/mol", "18 g/mol", "20 g/mol", "10 g/mol"], ans: 1 },
+                    { q: "How many particles are in 1 mole of a substance?", options: ["6.022 × 10²³", "3.00 × 10⁸", "9.81 × 10²", "1.6 × 10⁻¹⁹"], ans: 0 },
+                    { q: "When sodium (Na) forms an ionic bond with chlorine (Cl), sodium:", options: ["Gains 1 electron", "Loses 1 electron", "Shares 2 electrons", "Gains 7 electrons"], ans: 1 }
                 ]
             },
             11: {
@@ -815,7 +919,14 @@ app.listen(PORT, () => console.log(`StemVerse live on port ${PORT}`));</pre>
                 quiz: [
                     { q: "What is the value of log₁₀(1,000)?", options: ["2", "3", "10", "100"], ans: 1 },
                     { q: "In simple harmonic motion of a pendulum T = 2π√(L/g), if gravity (g) decreases (like on the Moon), the period T:", options: ["Increases (swings slower)", "Decreases (swings faster)", "Stays the same", "Becomes zero"], ans: 0 },
-                    { q: "What is the amplitude of the wave y = -4·sin(3x) + 1?", options: ["1", "3", "4", "-4"], ans: 2 }
+                    { q: "What is the amplitude of the wave y = -4·sin(3x) + 1?", options: ["1", "3", "4", "-4"], ans: 2 },
+                    { q: "What is log₂(32)?", options: ["4", "5", "6", "16"], ans: 1 },
+                    { q: "What is i² equal to?", options: ["1", "-1", "i", "0"], ans: 1 },
+                    { q: "What is the period of y = 3·sin(2x)?", options: ["2π", "π", "π/2", "3π"], ans: 1 },
+                    { q: "Simplify: sin²θ + cos²θ", options: ["0", "1", "2", "tan θ"], ans: 1 },
+                    { q: "What is the pH of a solution with [H⁺] = 10⁻³ M?", options: ["3", "-3", "11", "7"], ans: 0 },
+                    { q: "At constant temperature, if the volume of a gas is halved, its pressure:", options: ["Halves", "Doubles", "Stays the same", "Quadruples"], ans: 1 },
+                    { q: "How much work is done pushing a box with 20 N of force for 5 m in the direction of the force?", options: ["4 J", "25 J", "100 J", "15 J"], ans: 2 }
                 ]
             },
             12: {
@@ -832,7 +943,14 @@ app.listen(PORT, () => console.log(`StemVerse live on port ${PORT}`));</pre>
                 quiz: [
                     { q: "What is the first derivative f'(x) of f(x) = 4x³ - 5x + 2?", options: ["12x² - 5", "4x² - 5", "x⁴ - 5", "12x³ - 5"], ans: 0 },
                     { q: "A reaction is spontaneous at a given temperature when Gibbs Free Energy (ΔG) is:", options: ["ΔG > 0", "ΔG < 0", "ΔG = 0", "Unrelated to ΔG"], ans: 1 },
-                    { q: "Evaluate the definite integral ∫₀² (3x²) dx:", options: ["4", "6", "8", "12"], ans: 2 }
+                    { q: "Evaluate the definite integral ∫₀² (3x²) dx:", options: ["4", "6", "8", "12"], ans: 2 },
+                    { q: "What is the derivative of f(x) = x³ - 6x?", options: ["3x² - 6", "x² - 6", "3x - 6", "3x² - 6x"], ans: 0 },
+                    { q: "Evaluate: lim(x→2) (x² - 4) / (x - 2)", options: ["0", "2", "4", "Undefined"], ans: 2 },
+                    { q: "Evaluate the definite integral ∫₀³ (2x) dx:", options: ["6", "9", "3", "18"], ans: 1 },
+                    { q: "What is the derivative of sin(x)?", options: ["-cos(x)", "cos(x)", "-sin(x)", "tan(x)"], ans: 1 },
+                    { q: "Using Ohm's Law (V = IR), what current flows through a 10 Ω resistor with 20 V across it?", options: ["0.5 A", "2 A", "200 A", "30 A"], ans: 1 },
+                    { q: "According to E = hf, increasing a photon's frequency:", options: ["Decreases its energy", "Increases its energy", "Has no effect", "Gives it mass"], ans: 1 },
+                    { q: "By Le Chatelier's principle, adding more reactant to a system at equilibrium shifts it:", options: ["Toward the reactants", "Toward the products", "Nowhere", "To stop reacting"], ans: 1 }
                 ]
             }
         };
@@ -873,7 +991,7 @@ app.listen(PORT, () => console.log(`StemVerse live on port ${PORT}`));</pre>
         function addXP(amount, reason) {
             currentXP += amount;
             document.getElementById('user-xp').textContent = `${currentXP} XP`;
-            showToast(`+${amount} XP! ${reason}`, "fa-bolt", "border-amber-400/60 text-amber-300");
+            if (reason) showToast(`+${amount} XP! ${reason}`, "fa-bolt", "border-amber-400/60 text-amber-300");
         }
 
         // --- TAB NAVIGATION ---
@@ -891,14 +1009,15 @@ app.listen(PORT, () => console.log(`StemVerse live on port ${PORT}`));</pre>
                 }
             });
 
+            if (tabName !== 'quiz') stopQuizTimer();
+
             if (tabName === 'labs') {
                 setTimeout(() => {
                     resizeAndDrawGraph();
                     resizePendulumCanvas();
                 }, 60);
             } else if (tabName === 'quiz') {
-                document.getElementById('quiz-grade-select').value = currentGrade;
-                loadQuizForGrade(currentGrade);
+                openQuizTab(currentGrade);
             }
         }
 
@@ -1451,59 +1570,544 @@ app.listen(PORT, () => console.log(`StemVerse live on port ${PORT}`));</pre>
         // ==========================================
         // GRADE-SPECIFIC INTERACTIVE QUIZ ENGINE
         // ==========================================
-        let quizState = { grade: 8, answers: {} };
+        const QUIZ_SECONDS_PER_QUESTION = 20;
+        const QUIZ_LENGTH_OPTIONS = [5, 10, 15];
+        const QUIZ_OPTION_BASE = "group w-full text-left px-4 py-3 rounded-xl border text-sm transition flex items-center gap-3";
+        const QUIZ_OPTION_IDLE = `${QUIZ_OPTION_BASE} border-slate-700 bg-slate-950 hover:border-indigo-500 hover:bg-indigo-500/10 text-slate-200`;
+        let quizSettings = { length: 10, timed: false };
+        let quizState = null;
+        let quizTimerId = null;
 
-        function loadQuizForGrade(gradeNum) {
-            const g = parseInt(gradeNum);
-            quizState = { grade: g, answers: {} };
-            const questions = CURRICULUM_DATA[g].quiz;
-            const container = document.getElementById('quiz-container');
-
-            let html = `<div class="space-y-4">`;
-            questions.forEach((qObj, qIdx) => {
-                html += `
-                    <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3">
-                        <div class="text-xs font-bold text-indigo-400 uppercase">Question ${qIdx + 1} of ${questions.length}</div>
-                        <div class="text-sm sm:text-base font-semibold text-white">${qObj.q}</div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                            ${qObj.options.map((opt, oIdx) => `
-                                <button onclick="selectQuizOption(${qIdx}, ${oIdx})" id="q-${qIdx}-opt-${oIdx}" class="text-left px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-950 hover:border-indigo-500 text-xs sm:text-sm text-slate-200 transition">
-                                    <span class="font-mono text-indigo-400 mr-2">${String.fromCharCode(65 + oIdx)}.</span>${opt}
-                                </button>
-                            `).join('')}
-                        </div>
-                        <div id="q-feedback-${qIdx}" class="hidden text-xs font-semibold pt-1"></div>
-                    </div>
-                `;
-            });
-            html += `</div>`;
-            container.innerHTML = html;
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
         }
 
-        function selectQuizOption(qIdx, oIdx) {
-            const qObj = CURRICULUM_DATA[quizState.grade].quiz[qIdx];
-            const fb = document.getElementById(`q-feedback-${qIdx}`);
-            fb.classList.remove('hidden');
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
 
-            qObj.options.forEach((_, idx) => {
-                const btn = document.getElementById(`q-${qIdx}-opt-${idx}`);
-                btn.disabled = true;
-                if (idx === qObj.ans) {
-                    btn.className = "text-left px-4 py-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-xs sm:text-sm text-emerald-200 font-semibold";
-                } else if (idx === oIdx) {
-                    btn.className = "text-left px-4 py-2.5 rounded-xl border border-rose-500 bg-rose-500/20 text-xs sm:text-sm text-rose-200";
+        function pickRandom(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        const SUPERSCRIPTS = { '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', '-': '⁻' };
+        const SUBSCRIPTS = { '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉' };
+        const toSuperscript = n => String(n).split('').map(ch => SUPERSCRIPTS[ch]).join('');
+        const toSubscript = n => String(n).split('').map(ch => SUBSCRIPTS[ch]).join('');
+        const monomial = (c, p) => p === 0 ? `${c}` : `${c}x${p === 1 ? '' : toSuperscript(p)}`;
+        const round2 = v => Math.round(v * 100) / 100;
+
+        // Returns the correct answer at options[0]; options are shuffled when the quiz set is built.
+        function makeQuestion(q, correct, candidates, fmt = v => `${v}`) {
+            const answer = fmt(correct);
+            const wrong = [];
+            for (const c of shuffleArray([...candidates])) {
+                const label = fmt(c);
+                if (wrong.length < 3 && label !== answer && !wrong.includes(label)) wrong.push(label);
+            }
+            for (let step = 1; wrong.length < 3 && typeof correct === 'number'; step++) {
+                const label = fmt(correct + (step % 2 ? step : -step));
+                if (label !== answer && !wrong.includes(label)) wrong.push(label);
+            }
+            return { q, options: [answer, ...wrong], ans: 0, generated: true };
+        }
+
+        // --- RANDOM PROBLEM GENERATORS (new numbers every quiz) ---
+        const QUESTION_GENERATORS = {
+            1: [
+                () => { const a = randInt(2, 10), b = randInt(1, 10), c = a + b; return makeQuestion(`What is ${a} + ${b}?`, c, [c + 1, c - 1, c + 2, c - 2, c + 10]); },
+                () => { const a = randInt(11, 20), b = randInt(2, 9), c = a - b; return makeQuestion(`What is ${a} - ${b}?`, c, [c + 1, c - 1, c + 2, a + b]); },
+                () => { const t = randInt(1, 9), o = randInt(0, 9), n = t * 10 + o; return makeQuestion(`What number has ${t} tens and ${o} ones?`, n, [o * 10 + t, t + o, n + 10, n - 1]); }
+            ],
+            2: [
+                () => { const a = randInt(120, 499), b = randInt(100, 399), c = a + b; return makeQuestion(`What is ${a} + ${b}?`, c, [c + 10, c - 10, c + 100, c - 100]); },
+                () => { const a = randInt(41, 98), b = randInt(12, a - 10), c = a - b; return makeQuestion(`What is ${a} - ${b}?`, c, [c + 10, c - 10, c + 1, a + b]); },
+                () => {
+                    const q = randInt(1, 3), d = randInt(1, 5), n = randInt(0, 3), cents = 25 * q + 10 * d + 5 * n;
+                    const plural = (count, word) => `${count} ${word}${count === 1 ? '' : 's'}`;
+                    return makeQuestion(`How many cents is ${plural(q, 'quarter')}, ${plural(d, 'dime')}, and ${plural(n, 'nickel')}?`, cents, [cents + 5, cents - 5, cents + 10, cents - 10], v => `${v}¢`);
                 }
-            });
+            ],
+            3: [
+                () => { const a = randInt(2, 10), b = randInt(2, 10), c = a * b; return makeQuestion(`What is ${a} × ${b}?`, c, [c + a, c - a, c + b, c - b, a + b]); },
+                () => { const b = randInt(2, 10), c = randInt(2, 10); return makeQuestion(`What is ${b * c} ÷ ${b}?`, c, [c + 1, c - 1, c + 2, b * c - b]); },
+                () => { const s = randInt(3, 15); return makeQuestion(`What is the perimeter of a square with ${s} cm sides?`, 4 * s, [s * s, 2 * s, 4 * s + 4, 3 * s], v => `${v} cm`); }
+            ],
+            4: [
+                () => { const l = randInt(5, 20), w = randInt(3, 12); return makeQuestion(`What is the area of a rectangle ${l} cm long and ${w} cm wide?`, l * w, [2 * (l + w), l + w, l * w + l, l * w - w], v => `${v} cm²`); },
+                () => { const a = randInt(12, 99), b = randInt(3, 9), c = a * b; return makeQuestion(`What is ${a} × ${b}?`, c, [c + b, c - b, c + 10, c - 10]); },
+                () => {
+                    let n = randInt(11, 99);
+                    if (n % 10 === 0) n++;
+                    return makeQuestion(`How is ${n}/100 written as a decimal?`, `0.${n}`, [`${n / 10}`, `0.0${n}`, `${n}.0`, `0.${String(n).split('').reverse().join('')}`]);
+                }
+            ],
+            5: [
+                () => { const s = randInt(2, 9); return makeQuestion(`What is the volume of a cube with ${s} cm sides?`, s ** 3, [s * s, 3 * s, 2 * s * s, s ** 3 + s], v => `${v} cm³`); },
+                () => { const l = randInt(2, 9), w = randInt(2, 9), h = randInt(2, 9), v = l * w * h; return makeQuestion(`What is the volume of a box ${l} m × ${w} m × ${h} m?`, v, [l + w + h, l * w + h, v + l, 2 * (l * w + w * h + l * h)], x => `${x} m³`); },
+                () => { const n = randInt(11, 99), m = pickRandom([10, 100]); return makeQuestion(`What is ${n / 10} × ${m}?`, n * m / 10, [n * m / 100, n * m, n / 10 + m], v => `${round2(v)}`); }
+            ],
+            6: [
+                () => { const p = pickRandom([10, 20, 25, 50, 75]), y = pickRandom([40, 60, 80, 120, 200]), c = p * y / 100; return makeQuestion(`What is ${p}% of ${y}?`, c, [c + 5, c * 2, y - c, p]); },
+                () => { const x = randInt(2, 9), a = randInt(2, 6), b = randInt(1, 12); return makeQuestion(`Solve for x: ${a}x + ${b} = ${a * x + b}`, x, [x + 1, x - 1, x + 2, a * x], v => `x = ${v}`); },
+                () => { const a = randInt(-12, -1), b = randInt(2, 15), c = a + b; return makeQuestion(`What is ${a} + ${b}?`, c, [c + 2, -c, a - b, c - 1]); }
+            ],
+            7: [
+                () => { const r = randInt(2, 10); return makeQuestion(`What is the area of a circle with radius ${r}? (Use π ≈ 3.14)`, round2(3.14 * r * r), [round2(6.28 * r), round2(3.14 * r), r * r, round2(6.28 * r * r)], v => v.toFixed(2)); },
+                () => {
+                    const price = pickRandom([20, 40, 60, 80, 120]), pct = pickRandom([10, 20, 25, 50]), sale = price * (100 - pct) / 100;
+                    return makeQuestion(`A $${price} item is ${pct}% off. What is the sale price?`, sale, [price * pct / 100, price + price * pct / 100, sale - 5, sale + 10], v => `$${round2(v)}`);
+                },
+                () => { const k = randInt(2, 9), x = randInt(2, 9); return makeQuestion(`If y = kx and y = ${k * x} when x = ${x}, what is k?`, k, [k * x - x, k * x + x, x, k + 1]); }
+            ],
+            8: [
+                () => {
+                    const [a, b, c] = pickRandom([[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25]]), k = a === 3 ? randInt(1, 4) : 1;
+                    return makeQuestion(`A right triangle has legs ${a * k} and ${b * k}. How long is the hypotenuse?`, c * k, [(a + b) * k, (c + 1) * k, b * k + 1, (c - 1) * k]);
+                },
+                () => { const m = randInt(2, 12), acc = randInt(2, 10), f = m * acc; return makeQuestion(`What net force accelerates a ${m} kg mass at ${acc} m/s²? (F = ma)`, f, [m + acc, f + m, f * 2, round2(m / acc)], v => `${v} N`); },
+                () => {
+                    const x1 = randInt(-3, 3), y1 = randInt(-5, 5), m = pickRandom([-3, -2, -1, 2, 3, 4]), dx = randInt(1, 4);
+                    return makeQuestion(`What is the slope of the line through (${x1}, ${y1}) and (${x1 + dx}, ${y1 + m * dx})?`, m, [-m, m + 1, m - 1, dx]);
+                }
+            ],
+            9: [
+                () => { const k = randInt(2, 12); return makeQuestion(`What are the roots of y = x² - ${k * k}?`, `x = ±${k}`, [`x = ${k} only`, `x = ±${k * k}`, `No real roots`, `x = ±${2 * k}`]); },
+                () => { const m = randInt(1, 5) * 2, v = randInt(2, 8); return makeQuestion(`A ${m} kg ball moves at ${v} m/s. What is its kinetic energy? (KE = ½mv²)`, m * v * v / 2, [m * v, m * v * v, m * v / 2, m * v * v / 4], x => `${round2(x)} J`); },
+                () => { const m = randInt(1, 10), h = randInt(2, 10); return makeQuestion(`What is the potential energy of a ${m} kg object ${h} m above the ground? (PE = mgh, g = 9.8 m/s²)`, round2(m * 9.8 * h), [m * h, round2(m * 9.8), round2(m * 9.8 * h * 2), round2(m * 9.8 + h)], v => `${v} J`); }
+            ],
+            10: [
+                () => {
+                    let h, k;
+                    do { h = randInt(-5, 5); k = randInt(-5, 5); } while (h === 0 || k === 0 || Math.abs(h) === Math.abs(k));
+                    const r = randInt(2, 9);
+                    const term = (v, c) => `(${v} ${c > 0 ? '-' : '+'} ${Math.abs(c)})²`;
+                    const eq = `${term('x', h)} + ${term('y', k)} = ${r * r}`;
+                    return Math.random() < 0.5
+                        ? makeQuestion(`What is the center of the circle ${eq}?`, `(${h}, ${k})`, [`(${-h}, ${-k})`, `(${k}, ${h})`, `(${-h}, ${k})`, `(${h}, ${-k})`])
+                        : makeQuestion(`What is the radius of the circle ${eq}?`, r, [r * r, 2 * r, r + 1, Math.round(r * r / 2)]);
+                },
+                () => { const n = randInt(2, 9); return makeQuestion(`What is the mass of ${n} moles of water (H₂O, 18 g/mol)?`, 18 * n, [16 * n, 18 + n, 2 * n, 18 * n + 18], v => `${v} g`); },
+                () => {
+                    const [fn, angle, value] = pickRandom([['sin', 30, '1/2'], ['cos', 60, '1/2'], ['sin', 90, '1'], ['cos', 0, '1'], ['tan', 45, '1'], ['sin', 60, '√3/2'], ['cos', 30, '√3/2'], ['sin', 45, '√2/2'], ['cos', 90, '0'], ['tan', 60, '√3']]);
+                    return makeQuestion(`What is the exact value of ${fn}(${angle}°)?`, value, ['0', '1/2', '√2/2', '√3/2', '1', '√3']);
+                }
+            ],
+            11: [
+                () => { const b = pickRandom([2, 3, 5, 10]), n = randInt(2, b === 2 ? 8 : b === 10 ? 6 : 4), val = b ** n; return makeQuestion(`What is log${toSubscript(b)}(${val.toLocaleString('en-US')})?`, n, [n + 1, n - 1, val / b, b]); },
+                () => { const n = randInt(1, 13); return makeQuestion(`What is the pH of a solution with [H⁺] = 10${toSuperscript(-n)} M?`, n, [-n, 14 - n, n + 1]); },
+                () => {
+                    const a = randInt(2, 9), b = randInt(2, 6);
+                    const period = k => k === 2 ? 'π' : k % 2 === 0 ? `π/${k / 2}` : `2π/${k}`;
+                    return makeQuestion(`What is the period of y = ${a}·sin(${b}x)?`, period(b), ['2π', `${2 * b}π`, period(b * 2), `${a}π`]);
+                }
+            ],
+            12: [
+                () => { const a = randInt(2, 9), n = randInt(2, 6); return makeQuestion(`What is the derivative of f(x) = ${monomial(a, n)}?`, monomial(a * n, n - 1), [monomial(a, n - 1), monomial(a * n, n), monomial(a + n, n - 1), monomial(a * n, n + 1)], v => `f'(x) = ${v}`); },
+                () => { const k = randInt(2, 9); return makeQuestion(`Evaluate the definite integral ∫₀${toSuperscript(k)} (2x) dx`, k * k, [2 * k, 2 * k * k, k * k + k, k * k - 1]); },
+                () => { const r = pickRandom([2, 4, 5, 10, 20]), i = randInt(1, 6), v = i * r; return makeQuestion(`Using Ohm's Law (V = IR), what current flows through a ${r} Ω resistor with ${v} V across it?`, i, [v * r, v + r, i + 1, v], x => `${x} A`); }
+            ]
+        };
 
-            if (oIdx === qObj.ans) {
-                fb.className = "text-xs font-semibold text-emerald-400 pt-1";
-                fb.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i>Correct! Great STEM reasoning.`;
-                addXP(15, `Correct Grade ${quizState.grade} Quiz Answer!`);
-            } else {
-                fb.className = "text-xs font-semibold text-rose-400 pt-1";
-                fb.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i>Not quite! The correct answer is highlighted in green.`;
+        function shuffleOptions(qObj) {
+            const order = shuffleArray(qObj.options.map((_, i) => i));
+            return { ...qObj, options: order.map(i => qObj.options[i]), ans: order.indexOf(qObj.ans) };
+        }
+
+        function generateQuestion(grade, exclude) {
+            const generators = QUESTION_GENERATORS[grade];
+            let qObj;
+            for (let attempt = 0; attempt < 20; attempt++) {
+                qObj = pickRandom(generators)();
+                if (!exclude.has(qObj.q)) break;
+            }
+            return qObj;
+        }
+
+        function buildQuizSet(grade, length) {
+            const fixed = shuffleArray([...CURRICULUM_DATA[grade].quiz]);
+            const generatedCount = Math.max(length - fixed.length, Math.round(length * 0.4));
+            const questions = fixed.splice(0, length - generatedCount);
+            const used = new Set(questions.map(q => q.q));
+            while (questions.length < length) {
+                const qObj = generateQuestion(grade, used);
+                used.add(qObj.q);
+                questions.push(qObj);
+            }
+            return { questions: shuffleArray(questions).map(shuffleOptions), reserve: fixed, used };
+        }
+
+        function getBestScore(grade) {
+            try {
+                const v = localStorage.getItem(`stemverse-quiz-best-${grade}`);
+                return v === null ? null : parseInt(v);
+            } catch (e) {
+                return null;
             }
         }
+
+        function saveBestScore(grade, pct) {
+            try { localStorage.setItem(`stemverse-quiz-best-${grade}`, pct); } catch (e) { }
+        }
+
+        // --- QUIZ SCREENS: SETUP → QUESTION → RESULTS ---
+        function openQuizTab(grade) {
+            document.getElementById('quiz-grade-select').value = grade;
+            if (quizState && quizState.grade === grade && quizState.phase !== 'setup') {
+                if (quizState.phase === 'question' && quizSettings.timed && !quizState.locked) startQuizTimer(false);
+                return;
+            }
+            loadQuizForGrade(grade);
+        }
+
+        function loadQuizForGrade(gradeNum) {
+            stopQuizTimer();
+            const g = parseInt(gradeNum);
+            document.getElementById('quiz-grade-select').value = g;
+            quizState = { grade: g, phase: 'setup' };
+            renderQuizSetup();
+        }
+
+        function setQuizLength(n) {
+            quizSettings.length = n;
+            renderQuizSetup();
+        }
+
+        function renderQuizSetup() {
+            const g = quizState.grade;
+            const best = getBestScore(g);
+            const lengthButtons = QUIZ_LENGTH_OPTIONS.map(n => `
+                <button onclick="setQuizLength(${n})" class="px-4 py-2 rounded-xl text-sm font-semibold border transition ${quizSettings.length === n ? 'bg-indigo-600 border-indigo-400 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-indigo-500'}">${n} Questions</button>
+            `).join('');
+
+            document.getElementById('quiz-container').innerHTML = `
+                <div class="quiz-pop text-center space-y-6 py-2">
+                    <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-tr from-amber-500 via-pink-500 to-indigo-600 flex items-center justify-center shadow-xl shadow-pink-500/20 animate-float">
+                        <i class="fa-solid fa-trophy text-3xl text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-display font-bold text-white">Grade ${g} Challenge</h3>
+                        <p class="text-sm text-slate-400">${CURRICULUM_DATA[g].level} • A fresh random mix of curriculum and generated problems every time</p>
+                        ${best !== null ? `<p class="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30"><i class="fa-solid fa-medal"></i>Your best: ${best}%</p>` : ''}
+                    </div>
+                    <div class="space-y-2">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-slate-500">Quiz Length</div>
+                        <div class="flex flex-wrap justify-center gap-2">${lengthButtons}</div>
+                    </div>
+                    <label class="inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 cursor-pointer hover:border-amber-500 transition text-left">
+                        <input type="checkbox" ${quizSettings.timed ? 'checked' : ''} onchange="quizSettings.timed = this.checked" class="w-4 h-4 accent-amber-500">
+                        <span class="text-sm text-slate-200"><i class="fa-solid fa-stopwatch text-amber-400 mr-1.5"></i>Beat the Clock: ${QUIZ_SECONDS_PER_QUESTION}s per question, bonus XP for fast answers</span>
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-400">
+                        <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800"><i class="fa-solid fa-fire text-orange-400 mr-1"></i>3+ correct in a row earns streak bonus XP</div>
+                        <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800"><i class="fa-solid fa-circle-half-stroke text-cyan-400 mr-1"></i>One 50/50 and one Swap lifeline per quiz</div>
+                        <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800"><i class="fa-solid fa-keyboard text-indigo-400 mr-1"></i>Answer with keys 1–4 or A–D, Enter for next</div>
+                    </div>
+                    <button onclick="startQuiz()" class="px-8 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-bold shadow-lg shadow-indigo-500/30 transition transform hover:scale-105 active:scale-95">
+                        <i class="fa-solid fa-play mr-2"></i>Start Quiz
+                    </button>
+                </div>`;
+        }
+
+        function startQuiz() {
+            const { questions, reserve, used } = buildQuizSet(quizState.grade, quizSettings.length);
+            quizState = {
+                grade: quizState.grade, phase: 'question', questions, reserve, used,
+                index: 0, correct: 0, streak: 0, bestStreak: 0, xpEarned: 0, missed: [],
+                fiftyUsed: false, swapUsed: false, locked: false, hidden: [], timeLeft: 0, startTime: Date.now()
+            };
+            renderQuizQuestion();
+        }
+
+        function renderQuizQuestion() {
+            const s = quizState;
+            const qObj = s.questions[s.index];
+            const total = s.questions.length;
+            s.locked = false;
+            s.hidden = [];
+
+            const lifelineButton = (id, onClick, used, icon, label) => `
+                <button id="${id}" data-lifeline onclick="${onClick}()" ${used ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${used ? 'border-slate-800 text-slate-600 cursor-not-allowed' : 'border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10'}">
+                    <i class="fa-solid ${icon} mr-1"></i>${label}
+                </button>`;
+
+            document.getElementById('quiz-container').innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3 text-sm">
+                        <span class="font-bold text-indigo-300">Question ${s.index + 1} <span class="text-slate-500 font-medium">of ${total}</span></span>
+                        <div class="flex items-center gap-2">
+                            <span id="quiz-streak" class="px-2.5 py-1 rounded-full text-xs font-bold bg-orange-500/15 text-orange-300 border border-orange-500/30 ${s.streak >= 2 ? '' : 'hidden'}"><i class="fa-solid fa-fire mr-1"></i>${s.streak} streak</span>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"><i class="fa-solid fa-star mr-1"></i><span id="quiz-score">${s.correct}</span> / ${total}</span>
+                        </div>
+                    </div>
+                    <div class="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-500" style="width: ${(s.index / total) * 100}%"></div>
+                    </div>
+                    ${quizSettings.timed ? `
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-stopwatch text-amber-400"></i>
+                        <div class="flex-1 h-2 rounded-full bg-slate-800 overflow-hidden">
+                            <div id="quiz-timer-bar" class="h-full bg-amber-400" style="width: 100%"></div>
+                        </div>
+                        <span id="quiz-timer-text" class="font-mono text-xs text-amber-300 w-8 text-right">${QUIZ_SECONDS_PER_QUESTION}s</span>
+                    </div>` : ''}
+                    <div id="quiz-card" class="quiz-pop p-5 sm:p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4">
+                        ${qObj.generated ? `<span class="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-pink-500/15 text-pink-300 border border-pink-500/30"><i class="fa-solid fa-dice mr-1"></i>Randomly generated</span>` : ''}
+                        <div class="text-base sm:text-lg font-semibold text-white leading-snug">${qObj.q}</div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            ${qObj.options.map((opt, i) => `
+                                <button onclick="answerQuiz(${i})" id="quiz-opt-${i}" class="${QUIZ_OPTION_IDLE}">
+                                    <span class="w-7 h-7 shrink-0 rounded-lg bg-slate-800 group-hover:bg-indigo-600 text-indigo-300 group-hover:text-white font-mono text-xs font-bold flex items-center justify-center transition">${String.fromCharCode(65 + i)}</span>
+                                    <span>${opt}</span>
+                                </button>`).join('')}
+                        </div>
+                        <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                            <div class="flex gap-2">
+                                ${lifelineButton('quiz-life-fifty', 'useFiftyFifty', s.fiftyUsed, 'fa-circle-half-stroke', '50/50')}
+                                ${lifelineButton('quiz-life-swap', 'useSwapQuestion', s.swapUsed, 'fa-arrows-rotate', 'Swap Question')}
+                            </div>
+                            <div id="quiz-feedback" class="text-sm font-semibold"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="hidden px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-lg transition">
+                            ${s.index + 1 === total ? '<i class="fa-solid fa-flag-checkered mr-1.5"></i>See Results' : 'Next Question<i class="fa-solid fa-arrow-right ml-1.5"></i>'}
+                        </button>
+                    </div>
+                </div>`;
+
+            if (quizSettings.timed) startQuizTimer(true);
+        }
+
+        function startQuizTimer(reset) {
+            stopQuizTimer();
+            if (reset) quizState.timeLeft = QUIZ_SECONDS_PER_QUESTION;
+            let last = Date.now();
+            quizTimerId = setInterval(() => {
+                const now = Date.now();
+                quizState.timeLeft = Math.max(0, quizState.timeLeft - (now - last) / 1000);
+                last = now;
+                const bar = document.getElementById('quiz-timer-bar');
+                if (bar) {
+                    bar.style.width = `${(quizState.timeLeft / QUIZ_SECONDS_PER_QUESTION) * 100}%`;
+                    bar.className = `h-full ${quizState.timeLeft <= 5 ? 'bg-rose-500' : 'bg-amber-400'}`;
+                    document.getElementById('quiz-timer-text').textContent = `${Math.ceil(quizState.timeLeft)}s`;
+                }
+                if (quizState.timeLeft <= 0) answerQuiz(-1);
+            }, 100);
+        }
+
+        function stopQuizTimer() {
+            clearInterval(quizTimerId);
+            quizTimerId = null;
+        }
+
+        function answerQuiz(choice) {
+            const s = quizState;
+            if (!s || s.phase !== 'question' || s.locked || s.hidden.includes(choice)) return;
+            s.locked = true;
+            stopQuizTimer();
+
+            const qObj = s.questions[s.index];
+            const isCorrect = choice === qObj.ans;
+
+            qObj.options.forEach((_, i) => {
+                const btn = document.getElementById(`quiz-opt-${i}`);
+                btn.disabled = true;
+                if (i === qObj.ans) btn.className = `${QUIZ_OPTION_BASE} border-emerald-500 bg-emerald-500/20 text-emerald-100 font-semibold quiz-correct`;
+                else if (i === choice) btn.className = `${QUIZ_OPTION_BASE} border-rose-500 bg-rose-500/20 text-rose-100 quiz-shake`;
+                else btn.className = `${QUIZ_OPTION_BASE} border-slate-800 bg-slate-950 text-slate-500 opacity-50`;
+            });
+            document.querySelectorAll('[data-lifeline]').forEach(btn => btn.disabled = true);
+
+            const fb = document.getElementById('quiz-feedback');
+            if (isCorrect) {
+                s.correct++;
+                s.streak++;
+                s.bestStreak = Math.max(s.bestStreak, s.streak);
+                const speedBonus = quizSettings.timed ? Math.ceil(s.timeLeft / 4) : 0;
+                const streakBonus = s.streak >= 3 ? 5 : 0;
+                const xp = 10 + speedBonus + streakBonus;
+                s.xpEarned += xp;
+                addXP(xp);
+                const praise = s.streak >= 3 ? `${s.streak} in a row! You're on fire!` : pickRandom(['Correct!', 'Nailed it!', 'Brilliant!', 'Great STEM reasoning!']);
+                fb.className = 'text-sm font-semibold text-emerald-400';
+                fb.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i>${praise} <span class="text-amber-300">+${xp} XP</span>`;
+            } else {
+                s.streak = 0;
+                const timedOut = choice === -1;
+                s.missed.push({ q: qObj.q, yours: timedOut ? 'Time ran out' : qObj.options[choice], correct: qObj.options[qObj.ans] });
+                fb.className = 'text-sm font-semibold text-rose-400';
+                fb.innerHTML = `<i class="fa-solid ${timedOut ? 'fa-hourglass-end' : 'fa-circle-xmark'} mr-1"></i>${timedOut ? "Time's up!" : 'Not quite!'} Answer: <span class="text-emerald-300">${qObj.options[qObj.ans]}</span>`;
+                if (timedOut) document.getElementById('quiz-card').classList.add('quiz-shake');
+            }
+
+            document.getElementById('quiz-score').textContent = s.correct;
+            const streakEl = document.getElementById('quiz-streak');
+            streakEl.classList.toggle('hidden', s.streak < 2);
+            streakEl.innerHTML = `<i class="fa-solid fa-fire mr-1"></i>${s.streak} streak`;
+
+            const next = document.getElementById('quiz-next-btn');
+            next.classList.remove('hidden');
+            next.focus({ preventScroll: true });
+        }
+
+        function nextQuizQuestion() {
+            const s = quizState;
+            if (!s || s.phase !== 'question' || !s.locked) return;
+            s.index++;
+            if (s.index < s.questions.length) renderQuizQuestion();
+            else renderQuizResults();
+        }
+
+        function useFiftyFifty() {
+            const s = quizState;
+            if (!s || s.phase !== 'question' || s.locked || s.fiftyUsed) return;
+            s.fiftyUsed = true;
+            const qObj = s.questions[s.index];
+            const wrong = shuffleArray(qObj.options.map((_, i) => i).filter(i => i !== qObj.ans));
+            s.hidden = wrong.slice(0, wrong.length - 1);
+            s.hidden.forEach(i => {
+                const btn = document.getElementById(`quiz-opt-${i}`);
+                btn.disabled = true;
+                btn.className = `${QUIZ_OPTION_BASE} border-slate-800 bg-slate-950 text-slate-600 opacity-30 line-through`;
+            });
+            const lifeline = document.getElementById('quiz-life-fifty');
+            lifeline.disabled = true;
+            lifeline.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold border transition border-slate-800 text-slate-600 cursor-not-allowed';
+        }
+
+        function useSwapQuestion() {
+            const s = quizState;
+            if (!s || s.phase !== 'question' || s.locked || s.swapUsed) return;
+            s.swapUsed = true;
+            const replacement = s.reserve.length ? s.reserve.pop() : generateQuestion(s.grade, s.used);
+            s.used.add(replacement.q);
+            s.questions[s.index] = shuffleOptions(replacement);
+            renderQuizQuestion();
+            showToast("Question swapped for a new one!", "fa-arrows-rotate", "border-cyan-400/60 text-cyan-200");
+        }
+
+        function goToQuizGrade(grade) {
+            selectGrade(grade);
+            loadQuizForGrade(grade);
+        }
+
+        function renderQuizResults() {
+            const s = quizState;
+            s.phase = 'results';
+            stopQuizTimer();
+
+            const total = s.questions.length;
+            const pct = Math.round((s.correct / total) * 100);
+            const prevBest = getBestScore(s.grade);
+            const isRecord = pct > (prevBest ?? 0);
+            if (isRecord || prevBest === null) saveBestScore(s.grade, pct);
+            const seconds = Math.round((Date.now() - s.startTime) / 1000);
+            const circumference = 2 * Math.PI * 52;
+
+            let msg, color;
+            if (pct >= 90) { msg = `Outstanding! You've mastered Grade ${s.grade}.`; color = '#34d399'; }
+            else if (pct >= 70) { msg = 'Great work! Review the missed questions below and go again.'; color = '#818cf8'; }
+            else { msg = 'Keep practicing! Revisit the Grade Explorer lessons, then try a new random set.'; color = '#fbbf24'; }
+
+            const stat = (icon, label, value) => `
+                <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center">
+                    <div class="text-lg font-display font-bold text-white">${value}</div>
+                    <div class="text-[11px] text-slate-400"><i class="fa-solid ${icon} mr-1"></i>${label}</div>
+                </div>`;
+
+            const missedHtml = s.missed.length ? `
+                <div class="space-y-2 text-left">
+                    <h4 class="text-sm font-semibold text-slate-300"><i class="fa-solid fa-book-open text-indigo-400 mr-1.5"></i>Review your missed questions</h4>
+                    ${s.missed.map(m => `
+                        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs space-y-1">
+                            <div class="text-slate-200 font-medium">${m.q}</div>
+                            <div class="text-rose-300"><i class="fa-solid fa-xmark mr-1"></i>Your answer: ${m.yours}</div>
+                            <div class="text-emerald-300"><i class="fa-solid fa-check mr-1"></i>Correct answer: ${m.correct}</div>
+                        </div>`).join('')}
+                </div>` : `<p class="text-sm text-emerald-300 font-semibold"><i class="fa-solid fa-crown mr-1.5"></i>Perfect score. Not a single miss!</p>`;
+
+            document.getElementById('quiz-container').innerHTML = `
+                <div class="quiz-pop text-center space-y-6">
+                    <div class="relative w-36 h-36 mx-auto">
+                        <svg viewBox="0 0 120 120" class="w-full h-full -rotate-90">
+                            <circle cx="60" cy="60" r="52" fill="none" stroke="#1e293b" stroke-width="10"/>
+                            <circle id="quiz-ring" cx="60" cy="60" r="52" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round"
+                                stroke-dasharray="${circumference}" stroke-dashoffset="${circumference}" style="transition: stroke-dashoffset 1.2s ease-out"/>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-3xl font-display font-bold text-white">${pct}%</span>
+                            <span class="text-xs text-slate-400">${s.correct} / ${total}</span>
+                        </div>
+                    </div>
+                    <div>
+                        ${isRecord
+                            ? '<span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40"><i class="fa-solid fa-medal"></i>New personal best!</span>'
+                            : `<span class="text-xs text-slate-400"><i class="fa-solid fa-medal text-amber-400 mr-1"></i>Your best: ${prevBest ?? pct}%</span>`}
+                        <p class="mt-2 text-sm font-semibold" style="color: ${color}">${msg}</p>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        ${stat('fa-star', 'Correct', `${s.correct}/${total}`)}
+                        ${stat('fa-fire', 'Best Streak', s.bestStreak)}
+                        ${stat('fa-bolt', 'XP Earned', `+${s.xpEarned}`)}
+                        ${stat('fa-clock', 'Time', `${Math.floor(seconds / 60)}m ${seconds % 60}s`)}
+                    </div>
+                    ${missedHtml}
+                    <div class="flex flex-wrap justify-center gap-2 pt-2">
+                        <button onclick="startQuiz()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white text-sm font-bold shadow-lg transition">
+                            <i class="fa-solid fa-shuffle mr-1.5"></i>Play Again (New Random Set)
+                        </button>
+                        <button onclick="loadQuizForGrade(quizState.grade)" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition">
+                            <i class="fa-solid fa-sliders mr-1.5"></i>Change Settings
+                        </button>
+                        ${s.grade < 12 ? `
+                        <button onclick="goToQuizGrade(${s.grade + 1})" class="px-5 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-sm font-semibold transition">
+                            <i class="fa-solid fa-arrow-up mr-1.5"></i>Try Grade ${s.grade + 1}
+                        </button>` : ''}
+                    </div>
+                </div>`;
+
+            const ring = document.getElementById('quiz-ring');
+            setTimeout(() => { ring.style.strokeDashoffset = circumference * (1 - pct / 100); }, 60);
+            if (pct >= 80) launchConfetti();
+            showToast(`Grade ${s.grade} quiz complete: ${s.correct}/${total} correct!`, "fa-trophy", "border-indigo-400/60 text-indigo-200");
+        }
+
+        function launchConfetti() {
+            const colors = ['#6366f1', '#34d399', '#fbbf24', '#f472b6', '#38bdf8'];
+            for (let i = 0; i < 80; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = `${Math.random() * 100}vw`;
+                piece.style.background = pickRandom(colors);
+                piece.style.animationDelay = `${Math.random() * 0.6}s`;
+                piece.style.animationDuration = `${2.2 + Math.random() * 1.6}s`;
+                piece.style.setProperty('--drift', `${randInt(-80, 80)}px`);
+                document.body.appendChild(piece);
+                setTimeout(() => piece.remove(), 4500);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (!quizState || quizState.phase !== 'question') return;
+            if (document.getElementById('tab-quiz').classList.contains('hidden')) return;
+            if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
+            const key = e.key.toLowerCase();
+            if (key.length === 1 && !quizState.locked) {
+                const idx = Math.max('1234'.indexOf(key), 'abcd'.indexOf(key));
+                if (idx >= 0 && idx < quizState.questions[quizState.index].options.length) {
+                    e.preventDefault();
+                    answerQuiz(idx);
+                }
+            } else if (e.key === 'Enter' && quizState.locked && e.target.tagName !== 'BUTTON') {
+                nextQuizQuestion();
+            }
+        });
 
         // ==========================================
         // RENDER.COM DEPLOYMENT MODAL & CLIPBOARD
